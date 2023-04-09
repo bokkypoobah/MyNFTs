@@ -138,6 +138,14 @@
             </b-table>
 
             <b-table v-if="!settings.editAccounts" small fixed striped responsive hover :fields="tokensFields" :items="pagedFilteredSortedTokens" show-empty empty-html="Click [+] above to add new collections" head-variant="light" class="mx-0 my-1">
+              <template #cell(number)="data">
+                <!--
+                <b-form-checkbox size="sm" :checked="selectedCollections[data.item.contract] ? 1 : 0" value="1" @change="toggleSelectedCollections([data.item])">
+                  {{ parseInt(data.index) + ((settings.collections.currentPage - 1) * settings.collections.pageSize) + 1 }}
+                </b-form-checkbox>
+                -->
+                {{ parseInt(data.index) + ((settings.tokens.currentPage - 1) * settings.tokens.pageSize) + 1 }}
+              </template>
             </b-table>
 
             <b-card v-if="false && settings.editAccounts" class="mx-5 mt-1 mb-0 p-0 border-1" no-body body-class="m-0 p-0" header-class="m-0 p-0">
@@ -552,6 +560,7 @@
           selectedCollections: {},
           selectedMainTable: {},
           tokensSortOptions: [
+            { value: 'sortkeyasc', text: '▲ Blah' },
             { value: 'nameasc', text: '▲ Name' },
             { value: 'namedsc', text: '▼ Name' },
           ],
@@ -598,7 +607,8 @@
             { key: 'delete', label: 'Delete', sortable: false, thStyle: 'width: 10%;', tdClass: 'text-truncate' },
           ],
           tokensFields: [
-            { key: 'tokenId', label: 'Id', sortable: false, thStyle: 'width: 50%;', tdClass: 'text-truncate' },
+            { key: 'number', label: '#', sortable: false, thStyle: 'width: 5%;', tdClass: 'text-truncate' },
+            { key: 'tokenId', label: 'Id', sortable: false, thStyle: 'width: 45%;', tdClass: 'text-truncate' },
             // { key: 'group', label: 'Group', sortable: false, thStyle: 'width: 20%;', tdClass: 'text-truncate' },
             { key: 'name', label: 'Name', sortable: false, thStyle: 'width: 50%;', tdClass: 'text-truncate' },
             // { key: 'ensName', label: 'ENS Name', sortable: false, thStyle: 'width: 15%;', tdClass: 'text-truncate' },
