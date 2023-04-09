@@ -76,8 +76,7 @@
               <div class="mt-0 flex-grow-1">
               </div>
             </div>
-            <!-- <b-table small fixed striped responsive hover :fields="collectionsFields" :items="pagedFilteredSortedCollections" show-empty empty-html="Click [+] above to add new collections" head-variant="light" class="mx-0 my-1"> -->
-            <b-table v-if="settings.editAccounts" small fixed striped responsive hover :items="filteredSortedAccounts" show-empty empty-html="Click [+] above to add new collections" head-variant="light" class="mx-0 my-1">
+            <b-table v-if="settings.editAccounts" small fixed striped responsive hover :fields="accountsFields" :items="filteredSortedAccounts" show-empty empty-html="Click [+] above to add new collections" head-variant="light" class="mx-0 my-1">
               <template #head(address)="data">
                 Address <b-button v-b-modal.new-address-modal-prevent-closing variant="link" v-b-popover.hover.top="'Add new account'"><b-icon-plus-square shift-v="+1" font-scale="1.0"></b-icon-plus-square></b-button>
                 <b-modal
@@ -105,18 +104,6 @@
                     </b-form-group>
                   </form>
                 </b-modal>
-                <!--
-                <b-button size="sm" :pressed.sync="settings.editAccounts" @click="saveSettings" variant="link" v-b-popover.hover.top="'Add new account'"><span v-if="settings.editAccounts"><b-icon-plus-square-fill shift-v="+1" font-scale="1.0"></b-icon-plus-square-fill></span><span v-else><b-icon-plus-square shift-v="+1" font-scale="1.0"></b-icon-plus-square></span></b-button>
-
-                <b-dropdown size="sm" variant="link" v-b-popover.hover="'Toggle selection'">
-                  <template #button-content>
-                    <b-icon-check-square shift-v="+1" font-scale="0.9"></b-icon-check-square>
-                  </template>
-                  <b-dropdown-item href="#" @click="toggleSelectedCollections(pagedFilteredSortedCollections)">Toggle selection for all addresses on this page</b-dropdown-item>
-                  <b-dropdown-item href="#" @click="toggleSelectedCollections(filteredSortedCollections)">Toggle selection for all addresses on all pages</b-dropdown-item>
-                  <b-dropdown-item href="#" @click="clearSelectedCollections()">Clear selection</b-dropdown-item>
-                </b-dropdown>
-                -->
               </template>
             </b-table>
 
@@ -570,6 +557,14 @@
           searchCollectionsFields: [
             { key: 'action', label: 'Action', sortable: false, thStyle: 'width: 10%;', tdClass: 'text-truncate' },
             { key: 'collection', label: 'Collection', sortable: false, thStyle: 'width: 90%;', tdClass: 'text-truncate' },
+          ],
+          accountsFields: [
+            { key: 'address', label: '#', sortable: false, thStyle: 'width: 20%;', tdClass: 'text-truncate' },
+            { key: 'name', label: 'Name', sortable: false, thStyle: 'width: 20%;', tdClass: 'text-truncate' },
+            { key: 'ensName', label: 'ENS Name', sortable: false, thStyle: 'width: 20%;', tdClass: 'text-truncate' },
+            { key: 'group', label: 'Group', sortable: false, thStyle: 'width: 20%;', tdClass: 'text-truncate' },
+            { key: 'sync', label: 'Sync', sortable: false, thStyle: 'width: 10%;', tdClass: 'text-truncate' },
+            { key: 'include', label: 'Include', sortable: false, thStyle: 'width: 10%;', tdClass: 'text-truncate' },
           ],
           collectionsFields: [
             { key: 'number', label: '#', sortable: false, thStyle: 'width: 5%;', tdClass: 'text-truncate' },
