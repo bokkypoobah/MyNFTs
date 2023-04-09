@@ -712,19 +712,29 @@
             return results;
           },
           filteredTokens() {
+            // settings.tokenFilter
+            const searchCollectionLower = this.settings.collectionfilter && this.settings.collectionfilter.toLowerCase() || null;
             const results = [];
             for (const token of this.tokens) {
+              let include = true;
               const collectionName = this.collections[token.contract] && this.collections[token.contract].name || null;
-              results.push({
-                ...token,
-                collectionName,
-                lastSale: {
-                  timestamp: token.lastSale && token.lastSale.timestamp || null,
-                  amount: token.lastSale && token.lastSale.price && token.lastSale.price.amount && token.lastSale.price.amount.native || null,
-                  currency: token.lastSale && token.lastSale.price && token.lastSale.price.currency && token.lastSale.price.currency.symbol || null,
-                  amountInUSD: token.lastSale && token.lastSale.price && token.lastSale.price.amount && token.lastSale.price.amount.usd || null,
-                },
-              });
+              if (searchCollectionLower) {
+                if (!(collectionName && collectionName.toLowerCase().includes(searchCollectionLower))) {
+                  include = false;
+                }
+              }
+              if (include) {
+                results.push({
+                  ...token,
+                  collectionName,
+                  lastSale: {
+                    timestamp: token.lastSale && token.lastSale.timestamp || null,
+                    amount: token.lastSale && token.lastSale.price && token.lastSale.price.amount && token.lastSale.price.amount.native || null,
+                    currency: token.lastSale && token.lastSale.price && token.lastSale.price.currency && token.lastSale.price.currency.symbol || null,
+                    amountInUSD: token.lastSale && token.lastSale.price && token.lastSale.price.amount && token.lastSale.price.amount.usd || null,
+                  },
+                });
+              }
             }
             return results;
           },
