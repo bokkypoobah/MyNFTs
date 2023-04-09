@@ -102,6 +102,27 @@
                 <b-form-select size="sm" v-model="settings.tokens.pageSize" @change="saveSettings" :options="pageSizes" v-b-popover.hover.top="'Tokens page size'"></b-form-select>
               </div>
             </div>
+
+            <!-- ADDITIONAL FILTERS -->
+            <div v-if="settings.showAdditionalFilters" class="d-flex flex-wrap m-0 p-0">
+              <div class="mt-0 pr-1" style="width: 13.0rem;">
+                <b-card no-header no-body class="m-0 mt-1 p-0 border-1">
+                  <b-card-body class="m-0 p-0">
+                    <font size="-2">
+                      <b-table small fixed striped sticky-header="200px" :fields="accountsFilterFields" :items="getAllAccounts" head-variant="light">
+                        <template #cell(select)="data">
+                          <b-form-checkbox size="sm" :checked="(settings.filters['accounts'] && settings.filters['accounts'][data.item.account]) ? 1 : 0" value="1" @change="filterChanged('accounts', data.item.account)"></b-form-checkbox>
+                        </template>
+                        <template #cell(account)="data">
+                          {{ data.item.accountName }}
+                        </template>
+                      </b-table>
+                    </font>
+                  </b-card-body>
+                </b-card>
+              </div>
+            </div>
+
             <b-table v-if="settings.editAccounts" small fixed striped responsive hover :fields="accountsFields" :items="filteredSortedAccounts" show-empty empty-html="Click [+] above to add new collections" head-variant="light" class="mx-0 my-1">
               <template #head(address)="data">
                 Address <b-button v-b-modal.new-address-modal-prevent-closing variant="link" v-b-popover.hover.top="'Add new account'"><b-icon-plus-square shift-v="+1" font-scale="0.8"></b-icon-plus-square></b-button>
@@ -532,6 +553,7 @@
             tokenFilter: null,
             collectionFilter: null,
             showAdditionalFilters: false,
+            filters: {},
             editAccounts: false,
             accounts: {},
             tokens: {
@@ -558,7 +580,7 @@
               pageSize: 100,
               sortOption: 'countdsc',
             },
-            version: 6,
+            version: 7,
           },
           newAddress: null,
           sync: {
@@ -648,6 +670,11 @@
             // { key: 'include', label: 'Include', sortable: false, thStyle: 'width: 5%;', tdClass: 'text-truncate' },
             // { key: 'delete', label: 'Delete', sortable: false, thStyle: 'width: 5%;', tdClass: 'text-truncate' },
           ],
+          accountsFilterFields: [
+            { key: 'select', label: '', thStyle: 'width: 15%;' },
+            { key: 'account', label: 'Account', sortable: true, tdClass: 'text-truncate' },
+            { key: 'count', label: '#', sortable: true, thStyle: 'width: 20%;', thClass: 'text-right', tdClass: 'text-right' },
+          ],
           collectionsFields: [
             { key: 'number', label: '#', sortable: false, thStyle: 'width: 5%;', tdClass: 'text-truncate' },
             { key: 'sort', label: 'Include', sortable: false, thStyle: 'width: 5%;', tdClass: 'text-truncate' },
@@ -670,6 +697,29 @@
 
         // --- COMPUTED ---
         computed: {
+          getAllAccounts() {
+            const accountsMap = {};
+            for (const token of this.filteredTokens) {
+              if (!(token.owner in accountsMap)) {
+                accountsMap[token.owner] = 0;
+              }
+              accountsMap[token.owner]++;
+            }
+            const results = [];
+            for (const [account, count] of Object.entries(accountsMap)) {
+              const accountInfo = this.settings.accounts[account] || {};
+              const accountName = accountInfo.name && (accountInfo.name + ' ' + account.substring(0, 8)) || account.substring(0, 16);
+              results.push({ account, accountName, count });
+            }
+            results.sort((a, b) => {
+              if (('' + a.accountName).localeCompare(b.accountName) == 0) {
+                results.sort((a, b) => a.count - b.count);
+              } else {
+                return ('' + a.accountName).localeCompare(b.accountName);
+              }
+            });
+            return results;
+          },
           newAddressState() {
             let status = false;
             if (this.newAddress) {
@@ -716,9 +766,12 @@
             return results;
           },
           filteredTokens() {
-            // settings.tokenFilter
             const tokenFilterRegex = this.settings.tokenFilter && this.settings.tokenFilter.length > 0 ? new RegExp(this.settings.tokenFilter, 'i') : null;
             const searchCollectionLower = this.settings.collectionfilter && this.settings.collectionfilter.toLowerCase() || null;
+            let accountFilter = null;
+            if (this.settings.filters.accounts && Object.keys(this.settings.filters.accounts).length > 0) {
+              accountFilter = this.settings.filters.accounts;
+            }
             const results = [];
             for (const token of this.tokens) {
               let include = true;
@@ -728,8 +781,13 @@
                   include = false;
                 }
               }
-              if (searchCollectionLower) {
+              if (include && searchCollectionLower) {
                 if (!(collectionName && collectionName.toLowerCase().includes(searchCollectionLower))) {
+                  include = false;
+                }
+              }
+              if (include && accountFilter) {
+                if (!(token.owner in accountFilter)) {
                   include = false;
                 }
               }
@@ -1072,7 +1130,25 @@
           },
           saveSettings() {
             localStorage.myNFTsSettings = JSON.stringify(this.settings);
-            // console.log("saveSettings: " + JSON.stringify(this.settings));
+            console.log("saveSettings: " + JSON.stringify(this.settings));
+          },
+          filterChanged(dataType, option) {
+            if (!this.settings.filters[dataType]) {
+              Vue.set(this.settings.filters, dataType, {});
+            }
+            if (this.settings.filters[dataType][option]) {
+              Vue.delete(this.settings.filters[dataType], option);
+              if (Object.keys(this.settings.filters[dataType]) == 0) {
+                Vue.delete(this.settings.filters, dataType);
+              }
+            } else {
+              Vue.set(this.settings.filters[dataType], option, true);
+            }
+            this.saveSettings();
+          },
+          resetAdditionalFilters() {
+            Vue.set(this.settings, 'filters', {});
+            this.saveSettings();
           },
           async syncAccounts() {
             console.log("syncAccounts");
