@@ -68,7 +68,7 @@
 
           <b-modal id="modal-token" hide-footer size="lg">
             <template #modal-title>
-              <font size="-1">{{ 'modalTx.hash' }}</font>
+              <font size="-1">{{ modalToken.token.name }}</font>
               <!--
               <b-button size="sm" @click="copyToClipboard(modalTx.hash);" variant="link" class="m-0 p-0" v-b-popover.hover.top="'Copy to clipboard'"><b-icon-clipboard shift-v="+1" font-scale="1.1"></b-icon-clipboard></b-button>
               <b-button size="sm" :href="'https://etherscan.io/tx/' + modalTx.hash" target="_blank" variant="link" class="m-0 p-0" v-b-popover.hover.top="'View in etherscan.io'">
@@ -302,6 +302,10 @@
             total: null,
             completed: null,
             halt: false,
+          },
+          modalToken: {
+            token: null,
+            collection: null,
           },
 
           collections: {},
@@ -650,9 +654,17 @@
             Vue.set(this.settings, 'filters', {});
             this.saveSettings();
           },
-          showModalToken(item) {
-            console.log("showModalToken: " + JSON.stringify(item));
-            // this.modalNFTCollection.nftCollection = nftCollection;
+          async showModalToken(item) {
+            // console.log("showModalToken: " + JSON.stringify(item));
+            let url = "https://api.reservoir.tools/collections/v5?contract=" + item.contract;
+            console.log(url);
+            const data = await fetch(url).then(response => response.json());
+            const collection = data.collections && data.collections.length == 1 && data.collections[0] || {};
+            this.modalToken = {
+              token: item,
+              collection,
+            };
+            console.log(JSON.stringify(this.modalToken, null, 2));
             this.$bvModal.show('modal-token');
           },
           async syncAccounts() {
