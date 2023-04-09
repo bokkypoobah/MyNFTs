@@ -69,12 +69,20 @@
           <b-card class="m-0 p-0 border-0" body-class="m-1 p-0" header-class="m-0 p-2">
             <div class="d-flex flex-wrap m-0 p-0">
               <div class="mt-0 pr-1">
-                <b-button size="sm" :disabled="settings.editAccounts" @click="syncAccounts()" variant="primary" v-b-popover.hover.top="'Select NFT collections to for accounts'">Sync</b-button>
+                <b-form-input type="text" size="sm" v-model.trim="settings.tokenFilter" @change="saveSettings" debounce="600" v-b-popover.hover.top="'Token id and name filter'" placeholder="🔍 token id or name regex" style="min-width: 12.0rem;"></b-form-input>
+              </div>
+              <div class="mt-0 pr-1">
+                <b-form-input type="text" size="sm" v-model.trim="settings.collectionfilter" @change="saveSettings" debounce="600" v-b-popover.hover.top="'Collection name filter'" placeholder="🔍 collection name" style="min-width: 12.0rem;"></b-form-input>
               </div>
               <div class="mt-0 flex-grow-1">
               </div>
               <div class="mt-0 pr-1">
                 <b-button size="sm" :pressed.sync="settings.editAccounts" @click="saveSettings" :variant="settings.editAccounts ? 'danger' : 'link'" v-b-popover.hover.top="settings.editAccounts ? 'End adding/editing accounts' : 'Add/Edit accounts'"><b-icon-pencil shift-v="+1" font-scale="1.0"></b-icon-pencil></b-button>
+              </div>
+              <div class="mt-0 flex-grow-1">
+              </div>
+              <div class="mt-0 pr-1">
+                <b-button size="sm" :disabled="settings.editAccounts" @click="syncAccounts()" variant="primary" v-b-popover.hover.top="'Select NFT collections to for accounts'">Sync</b-button>
               </div>
               <div class="mt-0 flex-grow-1">
               </div>
@@ -518,6 +526,8 @@
           coinbase: null,
           settings: {
             tabIndex: 0,
+            tokenFilter: null,
+            collectionFilter: null,
             editAccounts: false,
             accounts: {},
             tokens: {
@@ -544,7 +554,7 @@
               pageSize: 100,
               sortOption: 'countdsc',
             },
-            version: 4,
+            version: 5,
           },
           newAddress: null,
           sync: {
