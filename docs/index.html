@@ -68,6 +68,9 @@
 
           <b-card class="m-0 p-0 border-0" body-class="m-1 p-0" header-class="m-0 p-2">
             <div class="d-flex flex-wrap m-0 p-0">
+              <div class="mt-0 pr-1">
+                <b-button size="sm" :disabled="settings.editAccounts" @click="syncAccounts()" variant="primary" v-b-popover.hover.top="'Select NFT collections to for accounts'">Sync</b-button>
+              </div>
               <div class="mt-0 flex-grow-1">
               </div>
               <div class="mt-0 pr-1">
@@ -950,6 +953,9 @@
           saveSettings() {
             localStorage.myNFTsSettings = JSON.stringify(this.settings);
             console.log("saveSettings: " + JSON.stringify(this.settings));
+          },
+          syncAccounts() {
+            console.log("syncAccounts");
           },
 
           getSecondaryCollectionsForOwner(owner) {
