@@ -68,16 +68,16 @@
 
           <b-card class="m-0 p-0 border-0" body-class="m-1 p-0" header-class="m-0 p-2">
             <div class="d-flex flex-wrap m-0 p-0">
-              <div class="mt-0 pr-1">
+              <div v-if="!settings.editAccounts" class="mt-0 pr-1">
                 <b-form-input type="text" size="sm" v-model.trim="settings.tokenFilter" @change="saveSettings" debounce="600" v-b-popover.hover.top="'Token id and name filter'" placeholder="🔍 token id/name regex" style="min-width: 8.0rem;"></b-form-input>
               </div>
-              <div class="mt-0 pr-1">
+              <div v-if="!settings.editAccounts" class="mt-0 pr-1">
                 <b-form-input type="text" size="sm" v-model.trim="settings.collectionfilter" @change="saveSettings" debounce="600" v-b-popover.hover.top="'Collection name filter'" placeholder="🔍 collection name" style="min-width: 8.0rem;"></b-form-input>
               </div>
-              <div class="mt-0 pr-1">
+              <div v-if="!settings.editAccounts" class="mt-0 pr-1">
                 <b-button size="sm" :pressed.sync="settings.showAdditionalFilters" @click="saveSettings" variant="link" v-b-popover.hover.top="'Additional filters'"><span v-if="settings.showAdditionalFilters"><b-icon-funnel-fill shift-v="+1" font-scale="1.0"></b-icon-funnel-fill></span><span v-else><b-icon-funnel shift-v="+1" font-scale="1.0"></b-icon-funnel></span></b-button>
               </div>
-              <div v-if="Object.keys(settings.filters).length > 0" class="mt-0 pr-1">
+              <div v-if="!settings.editAccounts && Object.keys(settings.filters).length > 0" class="mt-0 pr-1">
                 <b-button size="sm" @click="resetAdditionalFilters();" variant="link" class="m-0 p-0" v-b-popover.hover.top="'Reset additional filters'">
                   <b-iconstack shift-v="-1" font-scale="1">
                     <b-icon stacked icon="funnel-fill" variant="info" scale="1"></b-icon>
@@ -88,11 +88,11 @@
               <div class="mt-0 flex-grow-1">
               </div>
               <div class="mt-0 pr-1">
-                <b-button size="sm" :pressed.sync="settings.editAccounts" @click="saveSettings" :variant="settings.editAccounts ? 'danger' : 'link'" v-b-popover.hover.top="settings.editAccounts ? 'End adding/editing accounts' : 'Add/Edit accounts'"><b-icon-pencil shift-v="+1" font-scale="1.0"></b-icon-pencil></b-button>
+                <b-button size="sm" :pressed.sync="settings.editAccounts" @click="saveSettings" :variant="settings.editAccounts ? 'danger' : 'link'" v-b-popover.hover.top="settings.editAccounts ? 'End adding/editing accounts. Click Sync to apply changes' : 'Add/Edit accounts'"><b-icon-pencil shift-v="+1" font-scale="1.0"></b-icon-pencil></b-button>
               </div>
               <div class="mt-0 flex-grow-1">
               </div>
-              <div class="mt-0 pr-1">
+              <div v-if="!settings.editAccounts" class="mt-0 pr-1">
                 <b-button size="sm" :disabled="settings.editAccounts" @click="syncAccounts()" variant="primary" v-b-popover.hover.top="'Select NFT collections to for accounts'">Sync</b-button>
               </div>
               <div class="mt-0 flex-grow-1">
@@ -112,7 +112,7 @@
             </div>
 
             <!-- ADDITIONAL FILTERS -->
-            <div v-if="settings.showAdditionalFilters" class="d-flex flex-wrap m-0 p-0">
+            <div v-if="!settings.editAccounts && settings.showAdditionalFilters" class="d-flex flex-wrap m-0 p-0">
               <div class="mt-0 pr-1" style="width: 13.0rem;">
                 <b-card no-header no-body class="m-0 mt-1 p-0 border-1">
                   <b-card-body class="m-0 p-0">
@@ -168,7 +168,7 @@
 
             <b-table v-if="settings.editAccounts" small fixed striped responsive hover :fields="accountsFields" :items="filteredSortedAccounts" show-empty empty-html="Click [+] above to add new collections" head-variant="light" class="mx-0 my-1">
               <template #head(address)="data">
-                Address <b-button v-b-modal.new-address-modal-prevent-closing variant="link" v-b-popover.hover.top="'Add new account'"><b-icon-plus-square shift-v="+1" font-scale="0.8"></b-icon-plus-square></b-button>
+                Account <b-button v-b-modal.new-address-modal-prevent-closing variant="link" v-b-popover.hover.top="'Add new account'"><b-icon-plus-square shift-v="+1" font-scale="0.8"></b-icon-plus-square></b-button>
                 <b-modal
                   id="new-address-modal-prevent-closing"
                   ref="modal"
@@ -808,8 +808,6 @@
             const results = [];
             for (const [contract, count] of Object.entries(collectionsMap)) {
               const collectionInfo = this.collections[contract] || {};
-              console.log("getAllCollections - contract: " + contract + " " + JSON.stringify(collectionInfo));
-              // const accountName = accountInfo.name && (accountInfo.name + ' ' + account.substring(0, 8)) || account.substring(0, 16);
               results.push({ collection: contract, collectionName: collectionInfo.name, count });
             }
             results.sort((a, b) => {
@@ -819,7 +817,6 @@
                 return ('' + a.collectionName).localeCompare(b.collectionName);
               }
             });
-            console.log("getAllCollections: " + JSON.stringify(results, null, 2));
             return results;
           },
           newAddressState() {
