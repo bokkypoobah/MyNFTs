@@ -87,7 +87,7 @@
               </div>
               <div class="mt-0 flex-grow-1">
               </div>
-              <div class="mt-0 pr-1">
+              <div v-if="!sync.section" class="mt-0 pr-1">
                 <b-button size="sm" :pressed.sync="settings.editAccounts" @click="saveSettings" :variant="settings.editAccounts ? 'danger' : 'link'" v-b-popover.hover.top="settings.editAccounts ? 'End adding/editing accounts. Click Sync to apply changes' : 'Add/Edit accounts'"><b-icon-pencil shift-v="+1" font-scale="1.0"></b-icon-pencil></b-button>
               </div>
               <div class="mt-0 flex-grow-1">
