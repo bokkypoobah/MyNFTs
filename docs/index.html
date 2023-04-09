@@ -947,6 +947,10 @@
             Vue.delete(this.settings.accounts, account);
             this.saveSettings();
           },
+          saveSettings() {
+            localStorage.myNFTsSettings = JSON.stringify(this.settings);
+            console.log("saveSettings: " + JSON.stringify(this.settings));
+          },
 
           getSecondaryCollectionsForOwner(owner) {
             const results = [];
@@ -1045,10 +1049,6 @@
           clearSelectedMainTable() {
             this.selectedMainTable = {};
             localStorage.selectedMainTable = JSON.stringify(this.selectedMainTable);
-          },
-          saveSettings() {
-            localStorage.myNFTsSettings = JSON.stringify(this.settings);
-            console.log("saveSettings: " + JSON.stringify(this.settings));
           },
           async addressesUpdated() {
             const db0 = new Dexie(this.db.name);
