@@ -90,7 +90,7 @@
                 <b-form-select size="sm" v-model="settings.tokens.sortOption" @change="saveSettings" :options="tokensSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
               </div>
               <div v-if="!settings.editAccounts" class="mt-0 pl-1">
-                <font size="-2" v-b-popover.hover.top="'# tokens'">{{ filteredSortedTokens.length }}</font>
+                <font size="-2" v-b-popover.hover.top="'# tokens'">{{ filteredSortedTokens.length + '/' + tokens.length }}</font>
               </div>
               <div v-if="!settings.editAccounts" class="mt-0 pl-1">
                 <b-pagination size="sm" v-model="settings.tokens.currentPage" @input="saveSettings" :total-rows="filteredSortedTokens.length" :per-page="settings.tokens.pageSize" style="height: 0;"></b-pagination>
