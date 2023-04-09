@@ -814,7 +814,6 @@
               }
               collectionsMap[token.contract]++;
             }
-            console.log(JSON.stringify(collectionsMap));
             const results = [];
             for (const [contract, count] of Object.entries(collectionsMap)) {
               const collectionInfo = this.collections[contract] || {};
@@ -1259,7 +1258,7 @@
           },
           saveSettings() {
             localStorage.myNFTsSettings = JSON.stringify(this.settings);
-            console.log("saveSettings: " + JSON.stringify(this.settings));
+            // console.log("saveSettings: " + JSON.stringify(this.settings));
           },
           filterChanged(dataType, option) {
             console.log("filterChanged - dataType: " + dataType + ", option: " + JSON.stringify(option));
@@ -1332,14 +1331,13 @@
             await this.loadNFTs();
           },
           async loadNFTs() {
-            console.log("loadNFTs");
             const db0 = new Dexie(this.db.name);
             db0.version(this.db.version).stores(this.db.schemaDefinition);
             const collections = {};
             const tokens = [];
             for (const [address, accountItem] of Object.entries(this.settings.accounts)) {
               if (accountItem.include) {
-                console.log("Including: " + address + " " + JSON.stringify(accountItem));
+                // console.log("Including: " + address + " " + JSON.stringify(accountItem));
                 const tokensData = await db0.cache.where("objectName").equals(address).toArray();
                 if (tokensData.length == 1) {
                   for (const token of tokensData[0].object) {
