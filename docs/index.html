@@ -146,6 +146,24 @@
                   </b-card-body>
                 </b-card>
               </div>
+
+              <div class="mt-0 pr-1" style="width: 13.0rem;">
+                <b-card no-header no-body class="m-0 mt-1 p-0 border-1">
+                  <b-card-body class="m-0 p-0">
+                    <font size="-2">
+                      <b-table small fixed striped sticky-header="200px" :fields="collectionsFilterFields" :items="getAllCollections" head-variant="light">
+                        <template #cell(select)="data">
+                          <b-form-checkbox size="sm" :checked="(settings.filters['collections'] && settings.filters['collections'][data.item.collection]) ? 1 : 0" value="1" @change="filterChanged('collections', data.item.collection)"></b-form-checkbox>
+                        </template>
+                        <template #cell(account)="data">
+                          {{ data.item.collectionName }}
+                        </template>
+                      </b-table>
+                    </font>
+                  </b-card-body>
+                </b-card>
+              </div>
+
             </div>
 
             <b-table v-if="settings.editAccounts" small fixed striped responsive hover :fields="accountsFields" :items="filteredSortedAccounts" show-empty empty-html="Click [+] above to add new collections" head-variant="light" class="mx-0 my-1">
@@ -705,6 +723,11 @@
             { key: 'account', label: 'Account', sortable: true, tdClass: 'text-truncate' },
             { key: 'count', label: '#', sortable: true, thStyle: 'width: 20%;', thClass: 'text-right', tdClass: 'text-right' },
           ],
+          collectionsFilterFields: [
+            { key: 'select', label: '', thStyle: 'width: 15%;' },
+            { key: 'collectionName', label: 'Collection', sortable: true, tdClass: 'text-truncate' },
+            { key: 'count', label: '#', sortable: true, thStyle: 'width: 20%;', thClass: 'text-right', tdClass: 'text-right' },
+          ],
           collectionsFields: [
             { key: 'number', label: '#', sortable: false, thStyle: 'width: 5%;', tdClass: 'text-truncate' },
             { key: 'sort', label: 'Include', sortable: false, thStyle: 'width: 5%;', tdClass: 'text-truncate' },
@@ -771,6 +794,32 @@
                 return ('' + a.accountName).localeCompare(b.accountName);
               }
             });
+            return results;
+          },
+          getAllCollections() {
+            const collectionsMap = {};
+            for (const token of this.filteredTokens) {
+              if (!(token.contract in collectionsMap)) {
+                collectionsMap[token.contract] = 0;
+              }
+              collectionsMap[token.contract]++;
+            }
+            console.log(JSON.stringify(collectionsMap));
+            const results = [];
+            for (const [contract, count] of Object.entries(collectionsMap)) {
+              const collectionInfo = this.collections[contract] || {};
+              console.log("getAllCollections - contract: " + contract + " " + JSON.stringify(collectionInfo));
+              // const accountName = accountInfo.name && (accountInfo.name + ' ' + account.substring(0, 8)) || account.substring(0, 16);
+              results.push({ collection: contract, collectionName: collectionInfo.name, count });
+            }
+            results.sort((a, b) => {
+              if (('' + a.collectionName).localeCompare(b.collectionName) == 0) {
+                results.sort((a, b) => a.count - b.count);
+              } else {
+                return ('' + a.collectionName).localeCompare(b.collectionName);
+              }
+            });
+            console.log("getAllCollections: " + JSON.stringify(results, null, 2));
             return results;
           },
           newAddressState() {
