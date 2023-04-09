@@ -76,6 +76,23 @@
               </b-button>
               -->
             </template>
+            <div class="d-flex flex-row">
+              <div>
+                <b-avatar v-if="modalToken && modalToken.token" rounded variant="light" size="8.0rem" :src="modalToken.token.image">
+                </b-avatar>
+              </div>
+              <div class="ml-2">
+                {{ modalToken.token && modalToken.token.name }}
+                <br />
+                {{ modalToken.token && modalToken.token.collectionName }}
+                <br />
+                {{ modalToken.token && modalToken.token.tokenId }}
+                <br />
+                {{ modalToken.token && modalToken.token.ownerName }}
+                <br />
+                <b-button size="sm" @click="requestReservoirAPITokenMetadataRefresh(modalToken.token)" variant="link" v-b-popover.hover.top="'Request a metadata refresh on the Reservoir API. Re-sync after a few minutes'"><b-icon-arrow-clockwise shift-v="+1" font-scale="1.2"></b-icon-arrow-clockwise></b-button>
+              </div>
+            </div>
           </b-modal>
 
           <b-card class="m-0 p-0 border-0" body-class="m-1 p-0" header-class="m-0 p-2">
@@ -246,7 +263,7 @@
               <template #cell(token)="data">
                 <div class="d-flex flex-row">
                   <div>
-                    <b-avatar rounded variant="light" size="7.0rem" :src="data.item.image">
+                    <b-avatar rounded variant="light" size="8.0rem" :src="data.item.image">
                     </b-avatar>
                   </div>
                   <div class="ml-2">
