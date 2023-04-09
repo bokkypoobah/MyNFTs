@@ -93,12 +93,12 @@
                       label="Address"
                       label-for="name-input"
                       invalid-feedback="Please enter a valid Ethereum address"
-                      :state="newAddressAddressState"
+                      :state="newAddressState"
                     >
                       <b-form-input
                         id="name-input"
-                        v-model="newAddress.address"
-                        :state="newAddressAddressState"
+                        v-model="newAddress"
+                        :state="newAddressState"
                         required
                         placeholder="0x1234..."
                       ></b-form-input>
@@ -508,10 +508,7 @@
             },
             version: 2,
           },
-          newAddress: {
-            address: null,
-            addressState: null,
-          },
+          newAddress: null,
           tabs: [
             { name: 'nfts', text: 'NFTs' },
             { name: 'accounts', text: 'Accounts' },
@@ -596,17 +593,17 @@
 
         // --- COMPUTED ---
         computed: {
-          newAddressAddressState() {
+          newAddressState() {
             let status = false;
-            if (this.newAddress.address) {
+            if (this.newAddress) {
               try {
-                // console.log("newAddressAddressState: " + this.newAddress.address)
-                const a = ethers.utils.getAddress(this.newAddress.address);
+                // console.log("newAddressState: " + this.newAddress.address)
+                const a = ethers.utils.getAddress(this.newAddress);
                 status = a && a.length > 0;
-                console.log("newAddressAddressState: " + status);
+                // console.log("newAddressState: " + status);
                 return status;
               } catch (e) {
-                console.log(e);
+                // console.log(e);
                 return false;
               }
             }
@@ -873,17 +870,16 @@
         methods: {
           checkFormValidity() {
             const valid = this.$refs.form.checkValidity()
-            this.newAddress.addressState = valid;
             // console.log("checkFormValidity: " + valid);
-            if (this.newAddress.address && this.newAddress.address.length > 0) {
+            if (this.newAddress && this.newAddress.length > 0) {
               try {
-                // console.log("checkFormValidity 1: " + this.newAddress.address)
-                const a = ethers.utils.getAddress(this.newAddress.address);
+                // console.log("checkFormValidity 1: " + this.newAddress)
+                const a = ethers.utils.getAddress(this.newAddress);
                 status = a && a.length > 0;
                 // console.log("checkFormValidity 2: " + status);
                 return status;
               } catch (e) {
-                console.log(e);
+                // console.log(e);
                 return false;
               }
             } else {
@@ -891,9 +887,7 @@
             }
           },
           newAddressResetModal() {
-            // this.newAddress.address = '0x000001f568875F378Bf6d170B790967FE429C81A'; // TODO null;
-            this.newAddress.address = null;
-            this.newAddress.addressState = null;
+            this.newAddress = null;
           },
           newAddressHandleOk(bvModalEvent) {
             // Prevent modal from closing
@@ -907,12 +901,31 @@
               return;
             }
             // Push the name to submitted names
-            // this.submittedNames.push(this.name)
-            console.log("Adding: " + JSON.stringify(this.newAddress));
+            if (!(this.newAddress in this.settings.accounts)) {
+              console.log("Adding: " + this.newAddress);
+              Vue.set(this.settings.accounts, this.newAddress, {
+                name: null,
+                ensName: null,
+                group: null,
+                sync: false,
+                include: false,
+              });
+              // this.settings.accounts[this.newAddress] = {
+              //   name: null,
+              //   ensName: null,
+              //   group: null,
+              //   sync: false,
+              //   include: false,
+              // };
+              console.log("Accounts: " + JSON.stringify(this.settings.accounts, null, 2));
+            } else {
+              console.log("Discarding duplicate: " + this.newAddress);
+            }
             // Hide the modal manually
             this.$nextTick(() => {
               this.$bvModal.hide('new-address-modal-prevent-closing');
             })
+            this.saveSettings();
           },
 
           getSecondaryCollectionsForOwner(owner) {
