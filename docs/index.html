@@ -78,7 +78,7 @@
             </div>
             <b-table v-if="settings.editAccounts" small fixed striped responsive hover :fields="accountsFields" :items="filteredSortedAccounts" show-empty empty-html="Click [+] above to add new collections" head-variant="light" class="mx-0 my-1">
               <template #head(address)="data">
-                Address <b-button v-b-modal.new-address-modal-prevent-closing variant="link" v-b-popover.hover.top="'Add new account'"><b-icon-plus-square shift-v="+1" font-scale="1.0"></b-icon-plus-square></b-button>
+                Address <b-button v-b-modal.new-address-modal-prevent-closing variant="link" v-b-popover.hover.top="'Add new account'"><b-icon-plus-square shift-v="+1" font-scale="0.8"></b-icon-plus-square></b-button>
                 <b-modal
                   id="new-address-modal-prevent-closing"
                   ref="modal"
@@ -104,6 +104,21 @@
                     </b-form-group>
                   </form>
                 </b-modal>
+              </template>
+              <template #cell(group)="data">
+                <b-form-input type="text" size="sm" v-model.trim="data.item.group" @change="setAccountField(data.item.address, 'group', $event)" placeholder="group"></b-form-input>
+              </template>
+              <template #cell(name)="data">
+                <b-form-input type="text" size="sm" v-model.trim="data.item.name" @change="setAccountField(data.item.address, 'name', $event)" placeholder="name"></b-form-input>
+              </template>
+              <template #cell(sync)="data">
+                <b-form-checkbox size="sm" :checked="data.item.sync ? 1 : 0" value="1" @change="toggleAccountField(data.item.address, 'sync')" v-b-popover.hover="'Include in sync process?'"></b-form-checkbox>
+              </template>
+              <template #cell(include)="data">
+                <b-form-checkbox size="sm" :checked="data.item.include ? 1 : 0" value="1" @change="toggleAccountField(data.item.address, 'include')" v-b-popover.hover="'Include in NFTs view?'"></b-form-checkbox>
+              </template>
+              <template #cell(delete)="data">
+                <b-button size="sm" @click="deleteAccount(data.item.address)" variant="link" v-b-popover.hover="'Delete account'"><b-icon-trash style="color: #ff0000;" shift-v="+1" font-scale="1.0"></b-icon-trash></b-button>
               </template>
             </b-table>
 
@@ -559,12 +574,13 @@
             { key: 'collection', label: 'Collection', sortable: false, thStyle: 'width: 90%;', tdClass: 'text-truncate' },
           ],
           accountsFields: [
-            { key: 'address', label: '#', sortable: false, thStyle: 'width: 20%;', tdClass: 'text-truncate' },
-            { key: 'name', label: 'Name', sortable: false, thStyle: 'width: 20%;', tdClass: 'text-truncate' },
-            { key: 'ensName', label: 'ENS Name', sortable: false, thStyle: 'width: 20%;', tdClass: 'text-truncate' },
+            { key: 'address', label: '#', sortable: false, thStyle: 'width: 30%;', tdClass: 'text-truncate' },
             { key: 'group', label: 'Group', sortable: false, thStyle: 'width: 20%;', tdClass: 'text-truncate' },
-            { key: 'sync', label: 'Sync', sortable: false, thStyle: 'width: 10%;', tdClass: 'text-truncate' },
-            { key: 'include', label: 'Include', sortable: false, thStyle: 'width: 10%;', tdClass: 'text-truncate' },
+            { key: 'name', label: 'Name', sortable: false, thStyle: 'width: 20%;', tdClass: 'text-truncate' },
+            { key: 'ensName', label: 'ENS Name', sortable: false, thStyle: 'width: 15%;', tdClass: 'text-truncate' },
+            { key: 'sync', label: 'Sync', sortable: false, thStyle: 'width: 5%;', tdClass: 'text-truncate' },
+            { key: 'include', label: 'Include', sortable: false, thStyle: 'width: 5%;', tdClass: 'text-truncate' },
+            { key: 'delete', label: 'Delete', sortable: false, thStyle: 'width: 5%;', tdClass: 'text-truncate' },
           ],
           collectionsFields: [
             { key: 'number', label: '#', sortable: false, thStyle: 'width: 5%;', tdClass: 'text-truncate' },
@@ -620,9 +636,20 @@
           },
           filteredSortedAccounts() {
             let results = this.filteredAccounts;
-            results.sort((a, b) => ('' + a.name).localeCompare(b.name));
+            results.sort((a, b) => {
+              if (('' + a.group).localeCompare(b.group) == 0) {
+                if (('' + a.name).localeCompare(b.name) == 0) {
+                  return ('' + a.account).localeCompare(b.account);
+                } else {
+                  return ('' + a.name).localeCompare(b.name);
+                }
+              } else {
+                return ('' + a.group).localeCompare(b.group);
+              }
+            });
             return results;
           },
+
           filteredCollections() {
             const results = [];
             for (const [contract, item] of Object.entries(this.collections)) {
@@ -922,6 +949,19 @@
             })
             this.saveSettings();
           },
+          toggleAccountField(account, field) {
+            Vue.set(this.settings.accounts[account], field, !this.settings.accounts[account][field]);
+            this.saveSettings();
+          },
+          setAccountField(account, field, value) {
+            // console.log("setAccountField: " + account + ", field: " + field + ", value: " + value);
+            Vue.set(this.settings.accounts[account], field, value);
+            this.saveSettings();
+          },
+          deleteAccount(account) {
+            Vue.delete(this.settings.accounts, account);
+            this.saveSettings();
+          },
 
           getSecondaryCollectionsForOwner(owner) {
             const results = [];
@@ -1022,7 +1062,7 @@
             localStorage.selectedMainTable = JSON.stringify(this.selectedMainTable);
           },
           saveSettings() {
-            console.log("saveSettings BEFORE: " + JSON.stringify(localStorage.myNFTsSettings));
+            // console.log("saveSettings BEFORE: " + JSON.stringify(localStorage.myNFTsSettings));
             localStorage.myNFTsSettings = JSON.stringify(this.settings);
             console.log("saveSettings AFTER : " + JSON.stringify(localStorage.myNFTsSettings));
           },
