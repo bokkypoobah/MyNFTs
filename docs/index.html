@@ -92,13 +92,13 @@
                     <b-form-group
                       label="Address"
                       label-for="name-input"
-                      invalid-feedback="Address is required"
-                      :state="newAddress.addressState"
+                      invalid-feedback="Please enter a valid Ethereum address"
+                      :state="newAddressAddressState"
                     >
                       <b-form-input
                         id="name-input"
                         v-model="newAddress.address"
-                        :state="newAddress.addressState"
+                        :state="newAddressAddressState"
                         required
                         placeholder="0x1234..."
                       ></b-form-input>
@@ -596,6 +596,22 @@
 
         // --- COMPUTED ---
         computed: {
+          newAddressAddressState() {
+            let status = false;
+            if (this.newAddress.address) {
+              try {
+                // console.log("newAddressAddressState: " + this.newAddress.address)
+                const a = ethers.utils.getAddress(this.newAddress.address);
+                status = a && a.length > 0;
+                console.log("newAddressAddressState: " + status);
+                return status;
+              } catch (e) {
+                console.log(e);
+                return false;
+              }
+            }
+            return null;
+          },
           filteredAccounts() {
             const results = [];
             for (const [address, item] of Object.entries(this.settings.accounts)) {
@@ -857,31 +873,45 @@
         methods: {
           checkFormValidity() {
             const valid = this.$refs.form.checkValidity()
-            this.newAddress.addressState = valid
-            console.log("checkFormValidity: " + valid);
-            return valid
+            this.newAddress.addressState = valid;
+            // console.log("checkFormValidity: " + valid);
+            if (this.newAddress.address && this.newAddress.address.length > 0) {
+              try {
+                // console.log("checkFormValidity 1: " + this.newAddress.address)
+                const a = ethers.utils.getAddress(this.newAddress.address);
+                status = a && a.length > 0;
+                // console.log("checkFormValidity 2: " + status);
+                return status;
+              } catch (e) {
+                console.log(e);
+                return false;
+              }
+            } else {
+              return valid;
+            }
           },
           newAddressResetModal() {
-            this.newAddress.address = ''
-            this.newAddress.addressState = null
+            // this.newAddress.address = '0x000001f568875F378Bf6d170B790967FE429C81A'; // TODO null;
+            this.newAddress.address = null;
+            this.newAddress.addressState = null;
           },
           newAddressHandleOk(bvModalEvent) {
             // Prevent modal from closing
-            bvModalEvent.preventDefault()
+            bvModalEvent.preventDefault();
             // Trigger submit handler
-            this.newAddressHandleSubmit()
+            this.newAddressHandleSubmit();
           },
           newAddressHandleSubmit() {
             // Exit when the form isn't valid
             if (!this.checkFormValidity()) {
-              return
+              return;
             }
             // Push the name to submitted names
             // this.submittedNames.push(this.name)
             console.log("Adding: " + JSON.stringify(this.newAddress));
             // Hide the modal manually
             this.$nextTick(() => {
-              this.$bvModal.hide('new-address-modal-prevent-closing')
+              this.$bvModal.hide('new-address-modal-prevent-closing');
             })
           },
 
