@@ -1001,6 +1001,14 @@
                 await delay(1500); // TODO: Adjust to avoid error 429 Too Many Requests.
               }
             }
+            db0.close();
+            await this.loadNFTs();
+          },
+          async loadNFTs() {
+            console.log("loadNFTs");
+            const db0 = new Dexie(this.db.name);
+            db0.version(this.db.version).stores(this.db.schemaDefinition);
+            db0.close();
           },
 
           getSecondaryCollectionsForOwner(owner) {
@@ -1515,30 +1523,33 @@
             // console.log("mounted - after: " + JSON.stringify(this.settings, null, 2));
           }
           (async() => {
-            const db0 = new Dexie(this.db.name);
-            db0.version(this.db.version).stores(this.db.schemaDefinition);
-            const collections = await db0.cache.where("objectName").equals('collections').toArray();
-            if (collections.length == 1) {
-              this.collections = collections[0].object;
-              // console.log("mounted - collections: " + JSON.stringify(this.collections, null, 2));
-            }
-            const mainToken = await db0.cache.where("objectName").equals('mainToken').toArray();
-            if (mainToken.length == 1) {
-              this.mainToken = mainToken[0].object;
-              // console.log("mounted - mainToken.owners: " + JSON.stringify(this.mainToken.owners, null, 2));
-            }
-            const ensMap = await db0.cache.where("objectName").equals('ensMap').toArray();
-            if (ensMap.length == 1) {
-              this.ensMap = ensMap[0].object;
-              // console.log("mounted - ensMap: " + JSON.stringify(this.ensMap, null, 2));
-            }
-            const secondaryData = await db0.cache.where("objectName").equals('secondaryData').toArray();
-            if (secondaryData.length == 1) {
-              this.secondaryData = secondaryData[0].object;
-              // console.log("mounted - secondaryData: " + JSON.stringify(this.secondaryData, null, 2));
-            }
-            db0.close();
+            await this.loadNFTs();
           })();
+          // (async() => {
+          //   const db0 = new Dexie(this.db.name);
+          //   db0.version(this.db.version).stores(this.db.schemaDefinition);
+          //   const collections = await db0.cache.where("objectName").equals('collections').toArray();
+          //   if (collections.length == 1) {
+          //     this.collections = collections[0].object;
+          //     // console.log("mounted - collections: " + JSON.stringify(this.collections, null, 2));
+          //   }
+          //   const mainToken = await db0.cache.where("objectName").equals('mainToken').toArray();
+          //   if (mainToken.length == 1) {
+          //     this.mainToken = mainToken[0].object;
+          //     // console.log("mounted - mainToken.owners: " + JSON.stringify(this.mainToken.owners, null, 2));
+          //   }
+          //   const ensMap = await db0.cache.where("objectName").equals('ensMap').toArray();
+          //   if (ensMap.length == 1) {
+          //     this.ensMap = ensMap[0].object;
+          //     // console.log("mounted - ensMap: " + JSON.stringify(this.ensMap, null, 2));
+          //   }
+          //   const secondaryData = await db0.cache.where("objectName").equals('secondaryData').toArray();
+          //   if (secondaryData.length == 1) {
+          //     this.secondaryData = secondaryData[0].object;
+          //     // console.log("mounted - secondaryData: " + JSON.stringify(this.secondaryData, null, 2));
+          //   }
+          //   db0.close();
+          // })();
         },
       })
     </script>
