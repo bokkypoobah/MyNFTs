@@ -244,7 +244,7 @@
                     <br />
                     {{ data.item.tokenId }}
                     <br />
-                    {{ data.item.owner }}
+                    {{ data.item.ownerName }}
                     <br />
                     <b-button size="sm" @click="requestReservoirAPITokenMetadataRefresh(data.item)" variant="link" v-b-popover.hover.top="'Request a metadata refresh on the Reservoir API. Re-sync after a few minutes'"><b-icon-arrow-clockwise shift-v="+1" font-scale="1.2"></b-icon-arrow-clockwise></b-button>
                     <!-- Volume: 1d {{ commify(data.item.volume["1day"]) + 'e' }}; 7d {{ commify(data.item.volume["7day"]) + 'e' }}; 30d {{ commify(data.item.volume["30day"]) + 'e' }}; allTime {{ commify(data.item.volume["allTime"]) + 'e' }}; tokens {{ data.item.tokenCount }}; onSale {{ data.item.onSaleCount }} -->
@@ -282,25 +282,7 @@
               pageSize: 10,
               sortOption: 'lastsaledsc',
             },
-            collections: {
-              filter: null,
-              currentPage: 1,
-              pageSize: 10,
-              sortOption: 'sortkeyasc',
-            },
-            crossTab: {
-              filter: null,
-              currentPage: 1,
-              pageSize: 100,
-              sortOption: 'countdsc',
-            },
-            mainTable: {
-              filter: null,
-              currentPage: 1,
-              pageSize: 100,
-              sortOption: 'countdsc',
-            },
-            version: 7,
+            version: 8,
           },
           newAddress: null,
           sync: {
@@ -310,47 +292,14 @@
             halt: false,
           },
 
-          searchCollections: {
-            filter: null,
-            results: [],
-          },
           collections: {},
           tokens: [],
-          collectionsData: {},
-          mainToken: {
-            tokens: {},
-            owners: {},
-            collection: {
-              name: null,
-              image: null,
-              slug: null,
-            }
-          },
-          secondaryData: {},
           ensMap: {},
           selectedCollections: {},
           selectedMainTable: {},
           tokensSortOptions: [
             { value: 'lastsaleasc', text: '▲ Last Sale' },
             { value: 'lastsaledsc', text: '▼ Last Sale' },
-          ],
-          collectionsSortOptions: [
-            { value: 'nameasc', text: '▲ Name' },
-            { value: 'namedsc', text: '▼ Name' },
-            { value: 'sortkeyasc', text: '▲ Include Sort Key, ▲ Name' },
-            { value: 'sortkeydsc', text: '▼ Include Sort Key, ▲ Name' },
-            { value: 'vol1dayasc', text: '▲ 1 Day Volume' },
-            { value: 'vol1daydsc', text: '▼ 1 Day Volume' },
-            { value: 'vol7dayasc', text: '▲ 7 Day Volume' },
-            { value: 'vol7daydsc', text: '▼ 7 Day Volume' },
-            { value: 'vol30dayasc', text: '▲ 30 Day Volume' },
-            { value: 'vol30daydsc', text: '▼ 30 Day Volume' },
-            { value: 'volallasc', text: '▲ All Time Volume' },
-            { value: 'volalldsc', text: '▼ All Time Volume' },
-          ],
-          mainTableSortOptions: [
-            { value: 'countasc', text: '▲ Collection #1 Token Count' },
-            { value: 'countdsc', text: '▼ Collection #1 Token Count' },
           ],
           pageSizes: [
             { value: 5, text: '5' },
@@ -362,10 +311,6 @@
             { value: 1000, text: '1k' },
             { value: 2500, text: '2.5k' },
             { value: 10000, text: '10k' },
-          ],
-          searchCollectionsFields: [
-            { key: 'action', label: 'Action', sortable: false, thStyle: 'width: 10%;', tdClass: 'text-truncate' },
-            { key: 'collection', label: 'Collection', sortable: false, thStyle: 'width: 90%;', tdClass: 'text-truncate' },
           ],
           accountsFields: [
             { key: 'address', label: '#', sortable: false, thStyle: 'width: 30%;', tdClass: 'text-truncate' },
@@ -379,12 +324,7 @@
           tokensFields: [
             { key: 'number', label: '#', sortable: false, thStyle: 'width: 5%;', tdClass: 'text-truncate' },
             { key: 'token', label: 'Token', sortable: false, thStyle: 'width: 45%;', tdClass: 'text-truncate' },
-            // { key: 'group', label: 'Group', sortable: false, thStyle: 'width: 20%;', tdClass: 'text-truncate' },
             { key: 'name', label: 'Name', sortable: false, thStyle: 'width: 50%;', tdClass: 'text-truncate' },
-            // { key: 'ensName', label: 'ENS Name', sortable: false, thStyle: 'width: 15%;', tdClass: 'text-truncate' },
-            // { key: 'sync', label: 'Sync', sortable: false, thStyle: 'width: 5%;', tdClass: 'text-truncate' },
-            // { key: 'include', label: 'Include', sortable: false, thStyle: 'width: 5%;', tdClass: 'text-truncate' },
-            // { key: 'delete', label: 'Delete', sortable: false, thStyle: 'width: 5%;', tdClass: 'text-truncate' },
           ],
           groupsFilterFields: [
             { key: 'select', label: '', thStyle: 'width: 15%;' },
@@ -400,16 +340,6 @@
             { key: 'select', label: '', thStyle: 'width: 15%;' },
             { key: 'collectionName', label: 'Collection', sortable: true, tdClass: 'text-truncate' },
             { key: 'count', label: '#', sortable: true, thStyle: 'width: 20%;', thClass: 'text-right', tdClass: 'text-right' },
-          ],
-          collectionsFields: [
-            { key: 'number', label: '#', sortable: false, thStyle: 'width: 5%;', tdClass: 'text-truncate' },
-            { key: 'sort', label: 'Include', sortable: false, thStyle: 'width: 5%;', tdClass: 'text-truncate' },
-            { key: 'collection', label: 'Collection', sortable: false, thStyle: 'width: 90%;', tdClass: 'text-truncate' },
-          ],
-          mainTableFields: [
-            { key: 'number', label: '#', sortable: false, thStyle: 'width: 5%;', tdClass: 'text-truncate' },
-            { key: 'owner', label: 'Owner', sortable: false, thStyle: 'width: 30%;', tdClass: 'text-truncate' },
-            { key: 'collections', label: 'Collections', sortable: false, thStyle: 'width: 65%;', tdClass: 'text-truncate' },
           ],
           db: {
             name: "mynfts089",
@@ -583,8 +513,11 @@
                 }
               }
               if (include) {
+                const ownerInfo = this.settings.accounts[token.owner] || {};
+                const ownerName = ownerInfo.name && (ownerInfo.name + ' ' + token.owner.substring(0, 8)) || token.owner.substring(0, 16);
                 results.push({
                   ...token,
+                  ownerName,
                   collectionName,
                   lastSale: {
                     timestamp: token.lastSale && token.lastSale.timestamp || null,
