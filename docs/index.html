@@ -957,11 +957,14 @@
           },
           async syncAccounts() {
             console.log("syncAccounts");
+            const db0 = new Dexie(this.db.name);
+            db0.version(this.db.version).stores(this.db.schemaDefinition);
             for (const [address, accountItem] of Object.entries(this.settings.accounts)) {
               console.log("Processing: " + address + " " + JSON.stringify(accountItem));
               if (accountItem.sync) {
+                const tokens = [];
                 let continuation = null;
-                const LIMIT = 20; // 200 max
+                const LIMIT = 200; // 200 max
                 do {
                   let url = "https://api.reservoir.tools/users/" + address + "/tokens/v7?limit=" + LIMIT + "&includeTopBid=true&includeAttributes=true&includeLastSale=true&includeRawData=true" +
                     (continuation != null ? "&continuation=" + continuation : '');
@@ -974,10 +977,14 @@
                        // state.sync.error = true;
                        return [];
                     });
-                  // continuation = data.continuation;
+                  continuation = data.continuation;
                   if (data && data.tokens) {
                     for (const tokenData of data.tokens) {
-                      console.log(JSON.stringify(tokenData));
+                      if (tokenData && tokenData.token) {
+                        tokens.push(tokenData.token);
+                      }
+                      // console.log(JSON.stringify(tokenData));
+
                       // const token = tokenData.token;
                       // tokens[token.tokenId] = {
                       //   owner: token.owner,
@@ -986,6 +993,12 @@
                     }
                   }
                 } while (continuation != null /*&& !state.halt && !state.sync.error */);
+                console.log("tokens: " + JSON.stringify(tokens, null, 2));
+                await db0.cache.put({ objectName: address, object: tokens }).then (function() {
+                }).catch(function(error) {
+                  console.log("error: " + error);
+                });
+                await delay(1500); // TODO: Adjust to avoid error 429 Too Many Requests.
               }
             }
           },
