@@ -553,7 +553,7 @@
           selectedMainTable: {},
           tokensSortOptions: [
             { value: 'nameasc', text: '▲ Name' },
-            { value: 'namedsc', text: '▼ Name' },            
+            { value: 'namedsc', text: '▼ Name' },
           ],
           collectionsSortOptions: [
             { value: 'nameasc', text: '▲ Name' },
@@ -1611,50 +1611,17 @@
             this.selectedMainTable = JSON.parse(localStorage.selectedMainTable);
           }
           if ('myNFTsSettings' in localStorage) {
-            // console.log("mounted - before - this.settings: " + JSON.stringify(this.settings, null, 2));
-            // console.log("mounted - before - localStorage.myNFTsSettings: " + localStorage.myNFTsSettings);
             const tempSettings = JSON.parse(localStorage.myNFTsSettings);
             if ('version' in tempSettings && tempSettings.version == this.settings.version) {
               this.settings = tempSettings;
-              // this.settings = { ...this.settings, ...JSON.parse(localStorage.myNFTsSettings) };
-              // this.settings.currentPage = 1;
-              // if (this.settings.txs.currentPage > 1) {
-              //   this.settings.txs.currentPage = 1;
-              // }
-              // if (this.settings.addressTable.currentPage > 1) {
-              //   this.settings.addressTable.currentPage = 1;
-              // }
+              if (this.settings.tokens.currentPage > 1) {
+                this.settings.tokens.currentPage = 1;
+              }
             }
-            // console.log("mounted - after: " + JSON.stringify(this.settings, null, 2));
           }
           (async() => {
             await this.loadNFTs();
           })();
-          // (async() => {
-          //   const db0 = new Dexie(this.db.name);
-          //   db0.version(this.db.version).stores(this.db.schemaDefinition);
-          //   const collections = await db0.cache.where("objectName").equals('collections').toArray();
-          //   if (collections.length == 1) {
-          //     this.collections = collections[0].object;
-          //     // console.log("mounted - collections: " + JSON.stringify(this.collections, null, 2));
-          //   }
-          //   const mainToken = await db0.cache.where("objectName").equals('mainToken').toArray();
-          //   if (mainToken.length == 1) {
-          //     this.mainToken = mainToken[0].object;
-          //     // console.log("mounted - mainToken.owners: " + JSON.stringify(this.mainToken.owners, null, 2));
-          //   }
-          //   const ensMap = await db0.cache.where("objectName").equals('ensMap').toArray();
-          //   if (ensMap.length == 1) {
-          //     this.ensMap = ensMap[0].object;
-          //     // console.log("mounted - ensMap: " + JSON.stringify(this.ensMap, null, 2));
-          //   }
-          //   const secondaryData = await db0.cache.where("objectName").equals('secondaryData').toArray();
-          //   if (secondaryData.length == 1) {
-          //     this.secondaryData = secondaryData[0].object;
-          //     // console.log("mounted - secondaryData: " + JSON.stringify(this.secondaryData, null, 2));
-          //   }
-          //   db0.close();
-          // })();
         },
       })
     </script>
