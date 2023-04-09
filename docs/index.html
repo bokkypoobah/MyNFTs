@@ -878,6 +878,10 @@
             if (this.settings.filters.accounts && Object.keys(this.settings.filters.accounts).length > 0) {
               accountFilter = this.settings.filters.accounts;
             }
+            let collectionFilter = null;
+            if (this.settings.filters.collections && Object.keys(this.settings.filters.collections).length > 0) {
+              collectionFilter = this.settings.filters.collections;
+            }
             const results = [];
             for (const token of this.tokens) {
               let include = true;
@@ -901,6 +905,11 @@
               }
               if (include && accountFilter) {
                 if (!(token.owner in accountFilter)) {
+                  include = false;
+                }
+              }
+              if (include && collectionFilter) {
+                if (!(token.contract in collectionFilter)) {
                   include = false;
                 }
               }
