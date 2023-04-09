@@ -500,12 +500,11 @@
             tabIndex: 0,
             editAccounts: false,
             accounts: {},
-            // mainCollection: "0x31385d3520bCED94f77AaE104b406994D8F2168C", // TODO: null,
             tokens: {
               filter: null,
               currentPage: 1,
               pageSize: 10,
-              sortOption: 'sortkeyasc',
+              sortOption: 'timestampdsc',
             },
             collections: {
               filter: null,
@@ -560,9 +559,8 @@
           selectedCollections: {},
           selectedMainTable: {},
           tokensSortOptions: [
-            { value: 'sortkeyasc', text: '▲ Blah' },
-            { value: 'nameasc', text: '▲ Name' },
-            { value: 'namedsc', text: '▼ Name' },
+            { value: 'timestampasc', text: '▲ Timestamp' },
+            { value: 'timestampdsc', text: '▼ Timestamp' },
           ],
           collectionsSortOptions: [
             { value: 'nameasc', text: '▲ Name' },
@@ -687,7 +685,13 @@
             const results = [];
             for (const token of this.tokens) {
               results.push({
-                ...token
+                ...token,
+                lastSale: {
+                  timestamp: token.lastSale && token.lastSale.timestamp || null,
+                  amount: token.lastSale && token.lastSale.price && token.lastSale.price.amount && token.lastSale.price.amount.native || null,
+                  currency: token.lastSale && token.lastSale.price && token.lastSale.price.currency && token.lastSale.price.currency.symbol || null,
+                  amountInUSD: token.lastSale && token.lastSale.price && token.lastSale.price.amount && token.lastSale.price.amount.usd || null,
+                },
                 // contract,
                 // name: item.name,
                 // slug: item.slug,
@@ -705,13 +709,30 @@
           },
           filteredSortedTokens() {
             let results = this.filteredTokens;
+            // { value: 'timestampasc', text: '▲ Timestamp' },
+            // { value: 'timestampdsc', text: '▼ Timestamp' },
+
+            if (this.settings.tokens.sortOption == 'timestampasc') {
+              results.sort((a, b) => {
+                const lastSaleA = a.lastSale && a.lastSale.timestamp || 0;
+                const lastSaleB = b.lastSale && b.lastSale.timestamp || 0;
+                return lastSaleA - lastSaleB;
+              });
+            } else if (this.settings.tokens.sortOption == 'timestampdsc') {
+              results.sort((a, b) => {
+                const lastSaleA = a.lastSale && a.lastSale.timestamp || 0;
+                const lastSaleB = b.lastSale && b.lastSale.timestamp || 0;
+                return lastSaleB - lastSaleA;
+              });
+            }
             return results;
           },
           pagedFilteredSortedTokens() {
-            return this.filteredSortedTokens.slice((this.settings.tokens.currentPage - 1) * this.settings.tokens.pageSize, this.settings.tokens.currentPage * this.settings.tokens.pageSize);
+            // return this.filteredSortedTokens.slice((this.settings.tokens.currentPage - 1) * this.settings.tokens.pageSize, this.settings.tokens.currentPage * this.settings.tokens.pageSize);
+            const result = this.filteredSortedTokens.slice((this.settings.tokens.currentPage - 1) * this.settings.tokens.pageSize, this.settings.tokens.currentPage * this.settings.tokens.pageSize);
+            console.log(JSON.stringify(result, null, 2));
+            return result;
           },
-
-
 
           filteredCollections() {
             const results = [];
@@ -1033,7 +1054,7 @@
                     .then(handleErrors)
                     .then(response => response.json())
                     .catch(function(error) {
-                       console.log("ERROR - updateCollection: " + error);
+                       console.log("ERROR - syncAccounts: " + error);
                        // state.sync.error = true;
                        return [];
                     });
@@ -1043,13 +1064,6 @@
                       if (tokenData && tokenData.token) {
                         tokens.push(tokenData.token);
                       }
-                      // console.log(JSON.stringify(tokenData));
-
-                      // const token = tokenData.token;
-                      // tokens[token.tokenId] = {
-                      //   owner: token.owner,
-                      //   image: token.image,
-                      // };
                     }
                   }
                 } while (continuation != null /*&& !state.halt && !state.sync.error */);
