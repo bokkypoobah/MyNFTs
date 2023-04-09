@@ -67,12 +67,112 @@
           </b-card>
 
           <b-card class="m-0 p-0 border-0" body-class="m-1 p-0" header-class="m-0 p-2">
+            <div class="d-flex flex-wrap m-0 p-0">
+              <div class="mt-0 flex-grow-1">
+              </div>
+              <div class="mt-0 pr-1">
+                <b-button size="sm" :pressed.sync="settings.editAccounts" @click="saveSettings" :variant="settings.editAccounts ? 'danger' : 'link'" v-b-popover.hover.top="settings.editAccounts ? 'End adding/editing accounts' : 'Add/Edit accounts'"><b-icon-pencil shift-v="+1" font-scale="1.0"></b-icon-pencil></b-button>
+              </div>
+              <div class="mt-0 flex-grow-1">
+              </div>
+            </div>
+            <!-- <b-table small fixed striped responsive hover :fields="collectionsFields" :items="pagedFilteredSortedCollections" show-empty empty-html="Click [+] above to add new collections" head-variant="light" class="mx-0 my-1"> -->
+            <b-table v-if="settings.editAccounts" small fixed striped responsive hover :items="filteredSortedAccounts" show-empty empty-html="Click [+] above to add new collections" head-variant="light" class="mx-0 my-1">
+              <template #head(address)="data">
+                Address <b-button v-b-modal.new-address-modal-prevent-closing variant="link" v-b-popover.hover.top="'Add new account'"><b-icon-plus-square shift-v="+1" font-scale="1.0"></b-icon-plus-square></b-button>
+                <b-modal
+                  id="new-address-modal-prevent-closing"
+                  ref="modal"
+                  title="New Address"
+                  @show="newAddressResetModal"
+                  @hidden="newAddressResetModal"
+                  @ok="newAddressHandleOk"
+                >
+                  <form ref="form" @submit.stop.prevent="newAddressHandleSubmit">
+                    <b-form-group
+                      label="Address"
+                      label-for="name-input"
+                      invalid-feedback="Address is required"
+                      :state="newAddressState"
+                    >
+                      <b-form-input
+                        id="name-input"
+                        v-model="newAddress"
+                        :state="newAddressState"
+                        required
+                        placeholder="0x1234..."
+                      ></b-form-input>
+                    </b-form-group>
+                  </form>
+                </b-modal>
+                <!--
+                <b-button size="sm" :pressed.sync="settings.editAccounts" @click="saveSettings" variant="link" v-b-popover.hover.top="'Add new account'"><span v-if="settings.editAccounts"><b-icon-plus-square-fill shift-v="+1" font-scale="1.0"></b-icon-plus-square-fill></span><span v-else><b-icon-plus-square shift-v="+1" font-scale="1.0"></b-icon-plus-square></span></b-button>
+
+                <b-dropdown size="sm" variant="link" v-b-popover.hover="'Toggle selection'">
+                  <template #button-content>
+                    <b-icon-check-square shift-v="+1" font-scale="0.9"></b-icon-check-square>
+                  </template>
+                  <b-dropdown-item href="#" @click="toggleSelectedCollections(pagedFilteredSortedCollections)">Toggle selection for all addresses on this page</b-dropdown-item>
+                  <b-dropdown-item href="#" @click="toggleSelectedCollections(filteredSortedCollections)">Toggle selection for all addresses on all pages</b-dropdown-item>
+                  <b-dropdown-item href="#" @click="clearSelectedCollections()">Clear selection</b-dropdown-item>
+                </b-dropdown>
+                -->
+              </template>
+            </b-table>
+
+            <b-card v-if="false && settings.editAccounts" class="mx-5 mt-1 mb-0 p-0 border-1" no-body body-class="m-0 p-0" header-class="m-0 p-0">
+              <b-card-header>
+                Accounts
+              </b-card-header>
+              <b-card-text>
+                <div class="d-flex flex-wrap m-1 p-0">
+                  <div class="mt-0 pr-1">
+                    <b-form-input type="text" size="sm" v-model.trim="searchCollections.filter" @input="doSearchCollections" debounce="600" v-b-popover.hover.top="'Collection name filter'" placeholder="🔍 collection name. Or <SPACE>, then <TAB>" style="min-width: 20.0rem;"></b-form-input>
+                  </div>
+                </div>
+                <b-table small fixed striped responsive hover :fields="searchCollectionsFields" :items="searchCollections.results" show-empty empty-html="Enter name fragment in the top left input field" head-variant="light" class="m-0">
+                  <template #cell(action)="data">
+                    <b-button v-if="!(data.item.contract in collections || data.item.tokenCount > 25000)" size="sm" @click="addAccount(data.item)" variant="primary">Add</b-button>
+                    <b-button v-if="data.item.contract in collections" disabled size="sm" @click="addAccount(data.item)" variant="outline-primary">Added</b-button>
+                    <b-button v-if="data.item.tokenCount > 25000" disabled size="sm" @click="addAccount(data.item)" variant="outline-primary">Too Large</b-button>
+                  </template>
+                </b-table>
+              </b-card-text>
+          </b-card>
+
+          <b-card v-if="false" no-body class="p-0 mt-1">
+            <!-- Search type tabs -->
+            <!--
+            <b-tabs card align="left" no-body v-model="settings.tabIndex" active-tab-class="m-0 p-0">
+              <b-tab v-for="t in tabs" :key="'dyn-tabx-' + t.name" @click="saveSettings" :title="t.text" title-item-class="p-0" title-link-class="px-2">
+              </b-tab>
+            </b-tabs>
+            -->
+
+
+            <!-- NFTs -->
+            <b-card v-if="false && settings.tabIndex == 0" class="m-0 p-0 border-0" body-class="m-1 p-0" header-class="m-0 p-2">
+              <template #header>
+                NFTs
+              </template>
+            </b-card>
+
+            <!-- Accounts -->
+            <b-card v-if="false && settings.tabIndex == 1" class="m-0 p-0 border-0" body-class="m-1 p-0" header-class="m-0 p-2">
+              <template #header>
+                Accounts
+              </template>
+            </b-card>
+
+          </b-card>
+
+          <b-card v-if="false" class="m-0 p-0 border-0" body-class="m-1 p-0" header-class="m-0 p-2">
             <template #header>
               Collections
             </template>
             <div class="d-flex flex-wrap m-0 p-0">
               <div v-if="false" class="mt-0 pr-1">
-                <b-form-input type="text" size="sm" v-model.trim="settings.collections.filter" @change="settingsUpdated" debounce="600" v-b-popover.hover.top="'Collection name filter'" placeholder="🔍 collection" style="min-width: 12.0rem;"></b-form-input>
+                <b-form-input type="text" size="sm" v-model.trim="settings.collections.filter" @change="saveSettings" debounce="600" v-b-popover.hover.top="'Collection name filter'" placeholder="🔍 collection" style="min-width: 12.0rem;"></b-form-input>
               </div>
               <div class="mt-0 pr-1">
                 <b-button size="sm" :disabled="sync.section != null || Object.keys(selectedCollections).length == 0" @click="processIt('syncCollections')" variant="primary" v-b-popover.hover.top="'Select collections to sync first'">Sync</b-button>
@@ -80,7 +180,7 @@
               <div class="mt-0 flex-grow-1">
               </div>
               <div class="mt-0 pr-1">
-                <b-button size="sm" :pressed.sync="settings.addCollection" @click="settingsUpdated" variant="link" v-b-popover.hover.top="'Add new collection'"><span v-if="settings.addCollection"><b-icon-plus-square-fill shift-v="+1" font-scale="1.0"></b-icon-plus-square-fill></span><span v-else><b-icon-plus-square shift-v="+1" font-scale="1.0"></b-icon-plus-square></span></b-button>
+                <b-button size="sm" :pressed.sync="settings.editAccounts" @click="saveSettings" variant="link" v-b-popover.hover.top="'Add new account'"><span v-if="settings.editAccounts"><b-icon-plus-square-fill shift-v="+1" font-scale="1.0"></b-icon-plus-square-fill></span><span v-else><b-icon-plus-square shift-v="+1" font-scale="1.0"></b-icon-plus-square></span></b-button>
               </div>
               <div class="mt-0 pr-1">
                 <b-button size="sm" :disabled="sync.section != null || Object.keys(selectedCollections).length == 0" @click="deleteCollections" variant="link" v-b-popover.hover="'Delete selected collections'"><b-icon-trash style="color: #ff0000;" shift-v="+1" font-scale="1.0"></b-icon-trash></b-button>
@@ -95,7 +195,7 @@
                 <b-button size="sm" :disabled="sync.section != null || filteredSortedMainTable.length == 0" @click="processIt('retrieveSecondaryCollection')" variant="primary" v-b-popover.hover.top="'Retrieve secondary collection data'">Retrieve Secondary</b-button>
               </div> -->
               <!-- <div class="mt-0 pr-1">
-                <b-form-input type="text" size="sm" v-model.trim="settings.addressTable.searchAddresses" @change="settingsUpdated" debounce="600" v-b-popover.hover.top="'Filter by partial address, name'" placeholder="🔍 address"></b-form-input>
+                <b-form-input type="text" size="sm" v-model.trim="settings.addressTable.searchAddresses" @change="saveSettings" debounce="600" v-b-popover.hover.top="'Filter by partial address, name'" placeholder="🔍 address"></b-form-input>
               </div> -->
               <div class="mt-0 flex-grow-1">
               </div>
@@ -114,10 +214,10 @@
               <!-- <div class="mt-0 flex-grow-1">
               </div>
               <div class="mt-0 pr-0">
-                <b-button size="sm" :pressed.sync="settings.addAddresses" @click="settingsUpdated" variant="link" v-b-popover.hover.top="'Add addresses, tx hashes, Etherscan API key'"><span v-if="settings.addAddresses"><b-icon-plus-square-fill shift-v="+1" font-scale="1.0"></b-icon-plus-square-fill></span><span v-else><b-icon-plus-square shift-v="+1" font-scale="1.0"></b-icon-plus-square></span></b-button>
+                <b-button size="sm" :pressed.sync="settings.addAddresses" @click="saveSettings" variant="link" v-b-popover.hover.top="'Add addresses, tx hashes, Etherscan API key'"><span v-if="settings.addAddresses"><b-icon-plus-square-fill shift-v="+1" font-scale="1.0"></b-icon-plus-square-fill></span><span v-else><b-icon-plus-square shift-v="+1" font-scale="1.0"></b-icon-plus-square></span></b-button>
               </div>
               <div class="mt-0 pr-1">
-                <b-button size="sm" :pressed.sync="settings.editAddresses" @click="settingsUpdated" :variant="settings.editAddresses ? 'danger' : 'link'" v-b-popover.hover.top="settings.editAddresses ? 'End editing address attributes' : 'Edit address attributes'"><b-icon-pencil shift-v="+1" font-scale="1.0"></b-icon-pencil></b-button>
+                <b-button size="sm" :pressed.sync="settings.editAddresses" @click="saveSettings" :variant="settings.editAddresses ? 'danger' : 'link'" v-b-popover.hover.top="settings.editAddresses ? 'End editing address attributes' : 'Edit address attributes'"><b-icon-pencil shift-v="+1" font-scale="1.0"></b-icon-pencil></b-button>
               </div> -->
               <!-- <div class="mt-0 flex-grow-1">
               </div> -->
@@ -127,24 +227,24 @@
               <!-- <div class="mt-0 flex-grow-1">
               </div> -->
               <div class="mt-0 pr-1">
-                <b-form-select size="sm" v-model="settings.collections.sortOption" @change="settingsUpdated" :options="collectionsSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
+                <b-form-select size="sm" v-model="settings.collections.sortOption" @change="saveSettings" :options="collectionsSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
               </div>
               <div class="mt-0 pr-1">
                 <font size="-2" v-b-popover.hover.top="'# txs'">{{ filteredSortedCollections.length }}</font>
               </div>
               <div class="mt-0 pr-1">
-                <b-pagination size="sm" v-model="settings.collections.currentPage" @input="settingsUpdated" :total-rows="filteredSortedCollections.length" :per-page="settings.collections.pageSize" style="height: 0;"></b-pagination>
+                <b-pagination size="sm" v-model="settings.collections.currentPage" @input="saveSettings" :total-rows="filteredSortedCollections.length" :per-page="settings.collections.pageSize" style="height: 0;"></b-pagination>
               </div>
               <div class="mt-0 pl-1">
-                <b-form-select size="sm" v-model="settings.collections.pageSize" @change="settingsUpdated" :options="pageSizes" v-b-popover.hover.top="'Addresses page size'"></b-form-select>
+                <b-form-select size="sm" v-model="settings.collections.pageSize" @change="saveSettings" :options="pageSizes" v-b-popover.hover.top="'Addresses page size'"></b-form-select>
               </div>
             </div>
             <!-- <b-card>
               {{ searchCollections.results }}
             </b-card> -->
-            <b-card v-if="settings.addCollection" class="mx-5 mt-1 mb-0 p-0 border-1" no-body body-class="m-0 p-0" header-class="m-0 p-0">
+            <b-card v-if="settings.editAccounts" class="mx-5 mt-1 mb-0 p-0 border-1" no-body body-class="m-0 p-0" header-class="m-0 p-0">
               <b-card-header>
-                Add Collection
+                Add Account
               </b-card-header>
               <b-card-text>
                 <div class="d-flex flex-wrap m-1 p-0">
@@ -154,9 +254,9 @@
                 </div>
                 <b-table small fixed striped responsive hover :fields="searchCollectionsFields" :items="searchCollections.results" show-empty empty-html="Enter name fragment in the top left input field" head-variant="light" class="m-0">
                   <template #cell(action)="data">
-                    <b-button v-if="!(data.item.contract in collections || data.item.tokenCount > 25000)" size="sm" @click="addCollection(data.item)" variant="primary">Add</b-button>
-                    <b-button v-if="data.item.contract in collections" disabled size="sm" @click="addCollection(data.item)" variant="outline-primary">Added</b-button>
-                    <b-button v-if="data.item.tokenCount > 25000" disabled size="sm" @click="addCollection(data.item)" variant="outline-primary">Too Large</b-button>
+                    <b-button v-if="!(data.item.contract in collections || data.item.tokenCount > 25000)" size="sm" @click="addAccount(data.item)" variant="primary">Add</b-button>
+                    <b-button v-if="data.item.contract in collections" disabled size="sm" @click="addAccount(data.item)" variant="outline-primary">Added</b-button>
+                    <b-button v-if="data.item.tokenCount > 25000" disabled size="sm" @click="addAccount(data.item)" variant="outline-primary">Too Large</b-button>
                   </template>
                   <template #cell(collection)="data">
                     <div class="d-flex flex-row">
@@ -213,27 +313,27 @@
             </b-table>
           </b-card>
 
-          <b-card class="m-0 p-0 border-0" no-body body-class="m-1 p-0" header-class="m-0 p-2">
+          <b-card v-if="false" class="m-0 p-0 border-0" no-body body-class="m-1 p-0" header-class="m-0 p-2">
             <template #header>
               CrossTab
             </template>
             <div class="d-flex flex-wrap m-0 mx-1 mt-1 p-0">
               <div class="mt-0 pr-1">
-                <b-form-input type="text" size="sm" v-model.trim="settings.crossTab.filter" @change="settingsUpdated" debounce="600" v-b-popover.hover.top="'TODO: Filter by address/ENS'" placeholder="address fragment" style="min-width: 12.0rem;"></b-form-input>
+                <b-form-input type="text" size="sm" v-model.trim="settings.crossTab.filter" @change="saveSettings" debounce="600" v-b-popover.hover.top="'TODO: Filter by address/ENS'" placeholder="address fragment" style="min-width: 12.0rem;"></b-form-input>
               </div>
               <div class="mt-0 flex-grow-1">
               </div>
               <div class="mt-0 pr-1">
-                <b-form-select size="sm" v-model="settings.crossTab.sortOption" @change="settingsUpdated" :options="mainTableSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
+                <b-form-select size="sm" v-model="settings.crossTab.sortOption" @change="saveSettings" :options="mainTableSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
               </div>
               <div class="mt-0 pr-1">
                 <font size="-2" v-b-popover.hover.top="'# txs'">{{ filteredSortedCrossTab.length }}</font>
               </div>
               <div class="mt-0 pr-1">
-                <b-pagination size="sm" v-model="settings.crossTab.currentPage" @input="settingsUpdated" :total-rows="filteredSortedCrossTab.length" :per-page="settings.crossTab.pageSize" style="height: 0;"></b-pagination>
+                <b-pagination size="sm" v-model="settings.crossTab.currentPage" @input="saveSettings" :total-rows="filteredSortedCrossTab.length" :per-page="settings.crossTab.pageSize" style="height: 0;"></b-pagination>
               </div>
               <div class="mt-0 pl-1">
-                <b-form-select size="sm" v-model="settings.crossTab.pageSize" @change="settingsUpdated" :options="pageSizes" v-b-popover.hover.top="'Addresses page size'"></b-form-select>
+                <b-form-select size="sm" v-model="settings.crossTab.pageSize" @change="saveSettings" :options="pageSizes" v-b-popover.hover.top="'Addresses page size'"></b-form-select>
               </div>
             </div>
             <b-table small fixed striped selectable responsive hover :fields="crossTabFields" :items="pagedFilteredSortedCrossTab" show-empty empty-html="Enter ERC-721 NFT collection address in the top left input field and click Retrieve" head-variant="light" class="m-0 mt-1">
@@ -269,7 +369,7 @@
             </template>
             <div class="d-flex flex-wrap m-0 p-0">
               <div class="mt-0 pr-1">
-                <b-form-input type="text" size="sm" v-model.trim="settings.mainCollection" @change="settingsUpdated" debounce="600" v-b-popover.hover.top="'Main collection to start from'" placeholder="0x{NFT collection address}" style="min-width: 12.0rem;"></b-form-input>
+                <b-form-input type="text" size="sm" v-model.trim="settings.mainCollection" @change="saveSettings" debounce="600" v-b-popover.hover.top="'Main collection to start from'" placeholder="0x{NFT collection address}" style="min-width: 12.0rem;"></b-form-input>
               </div>
               <div class="mt-0 pr-1">
                 <b-button size="sm" :disabled="sync.section != null || settings.mainCollection == null || settings.mainCollection.length == 0" @click="processIt('retrieveMainCollection')" variant="primary" v-b-popover.hover.top="'Retrieve main collection data'">Retrieve Main</b-button>
@@ -278,7 +378,7 @@
                 <b-button size="sm" :disabled="sync.section != null || filteredSortedMainTable.length == 0" @click="processIt('retrieveSecondaryCollection')" variant="primary" v-b-popover.hover.top="'Retrieve secondary collection data'">Retrieve Secondary</b-button>
               </div>
               <!-- <div class="mt-0 pr-1">
-                <b-form-input type="text" size="sm" v-model.trim="settings.addressTable.searchAddresses" @change="settingsUpdated" debounce="600" v-b-popover.hover.top="'Filter by partial address, name'" placeholder="🔍 address"></b-form-input>
+                <b-form-input type="text" size="sm" v-model.trim="settings.addressTable.searchAddresses" @change="saveSettings" debounce="600" v-b-popover.hover.top="'Filter by partial address, name'" placeholder="🔍 address"></b-form-input>
               </div> -->
               <div class="mt-0 flex-grow-1">
               </div>
@@ -297,10 +397,10 @@
               <!-- <div class="mt-0 flex-grow-1">
               </div>
               <div class="mt-0 pr-0">
-                <b-button size="sm" :pressed.sync="settings.addAddresses" @click="settingsUpdated" variant="link" v-b-popover.hover.top="'Add addresses, tx hashes, Etherscan API key'"><span v-if="settings.addAddresses"><b-icon-plus-square-fill shift-v="+1" font-scale="1.0"></b-icon-plus-square-fill></span><span v-else><b-icon-plus-square shift-v="+1" font-scale="1.0"></b-icon-plus-square></span></b-button>
+                <b-button size="sm" :pressed.sync="settings.addAddresses" @click="saveSettings" variant="link" v-b-popover.hover.top="'Add addresses, tx hashes, Etherscan API key'"><span v-if="settings.addAddresses"><b-icon-plus-square-fill shift-v="+1" font-scale="1.0"></b-icon-plus-square-fill></span><span v-else><b-icon-plus-square shift-v="+1" font-scale="1.0"></b-icon-plus-square></span></b-button>
               </div>
               <div class="mt-0 pr-1">
-                <b-button size="sm" :pressed.sync="settings.editAddresses" @click="settingsUpdated" :variant="settings.editAddresses ? 'danger' : 'link'" v-b-popover.hover.top="settings.editAddresses ? 'End editing address attributes' : 'Edit address attributes'"><b-icon-pencil shift-v="+1" font-scale="1.0"></b-icon-pencil></b-button>
+                <b-button size="sm" :pressed.sync="settings.editAddresses" @click="saveSettings" :variant="settings.editAddresses ? 'danger' : 'link'" v-b-popover.hover.top="settings.editAddresses ? 'End editing address attributes' : 'Edit address attributes'"><b-icon-pencil shift-v="+1" font-scale="1.0"></b-icon-pencil></b-button>
               </div> -->
               <!-- <div class="mt-0 flex-grow-1">
               </div> -->
@@ -310,16 +410,16 @@
               <!-- <div class="mt-0 flex-grow-1">
               </div> -->
               <div class="mt-0 pr-1">
-                <b-form-select size="sm" v-model="settings.mainTable.sortOption" @change="settingsUpdated" :options="mainTableSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
+                <b-form-select size="sm" v-model="settings.mainTable.sortOption" @change="saveSettings" :options="mainTableSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
               </div>
               <div class="mt-0 pr-1">
                 <font size="-2" v-b-popover.hover.top="'# txs'">{{ filteredSortedMainTable.length }}</font>
               </div>
               <div class="mt-0 pr-1">
-                <b-pagination size="sm" v-model="settings.mainTable.currentPage" @input="settingsUpdated" :total-rows="filteredSortedMainTable.length" :per-page="settings.mainTable.pageSize" style="height: 0;"></b-pagination>
+                <b-pagination size="sm" v-model="settings.mainTable.currentPage" @input="saveSettings" :total-rows="filteredSortedMainTable.length" :per-page="settings.mainTable.pageSize" style="height: 0;"></b-pagination>
               </div>
               <div class="mt-0 pl-1">
-                <b-form-select size="sm" v-model="settings.mainTable.pageSize" @change="settingsUpdated" :options="pageSizes" v-b-popover.hover.top="'Addresses page size'"></b-form-select>
+                <b-form-select size="sm" v-model="settings.mainTable.pageSize" @change="saveSettings" :options="pageSizes" v-b-popover.hover.top="'Addresses page size'"></b-form-select>
               </div>
             </div>
 
@@ -356,7 +456,7 @@
         </b-card>
         <b-card no-header body-class="m-0 p-0" class="m-0 p-0 border-0">
           <b-card-text class="text-right">
-            gm, and enjoy! <i>Txs</i> &copy; Bok Consulting Pty Ltd 2023.
+            gm, and enjoy! <i>MyNFTs</i> &copy; Bok Consulting Pty Ltd 2023.
           </b-card-text>
         </b-card no-header>
       </b-container>
@@ -369,8 +469,25 @@
         data: {
           coinbase: null,
           settings: {
-            mainCollection: "0x31385d3520bCED94f77AaE104b406994D8F2168C", // TODO: null,
-            addCollection: false,
+            tabIndex: 0,
+            editAccounts: false,
+            accounts: {
+              "0x1234": {
+                name: "Aaaah",
+                ensName: "Aaaaah.eth",
+                group: "AAA",
+                sync: true,
+                include: true,
+              },
+              "0x2345": {
+                name: "Baaah",
+                ensName: "Baaaah.eth",
+                group: "BBB",
+                sync: true,
+                include: true,
+              },
+            },
+            // mainCollection: "0x31385d3520bCED94f77AaE104b406994D8F2168C", // TODO: null,
             collections: {
               filter: null,
               currentPage: 1,
@@ -389,7 +506,14 @@
               pageSize: 100,
               sortOption: 'countdsc',
             },
+            version: 2,
           },
+          newAddress: null,
+          newAddressState: null,
+          tabs: [
+            { name: 'nfts', text: 'NFTs' },
+            { name: 'accounts', text: 'Accounts' },
+          ],
           searchCollections: {
             filter: null,
             results: [],
@@ -459,7 +583,7 @@
             { key: 'collections', label: 'Collections', sortable: false, thStyle: 'width: 65%;', tdClass: 'text-truncate' },
           ],
           db: {
-            name: "nftowner089",
+            name: "mynfts089",
             version: 1,
             schemaDefinition: {
               cache: '&objectName',
@@ -470,6 +594,25 @@
 
         // --- COMPUTED ---
         computed: {
+          filteredAccounts() {
+            const results = [];
+            for (const [address, item] of Object.entries(this.settings.accounts)) {
+              results.push({
+                address,
+                name: item.name,
+                ensName: item.ensName,
+                group: item.group,
+                sync: item.sync,
+                include: item.include,
+              });
+            }
+            return results;
+          },
+          filteredSortedAccounts() {
+            let results = this.filteredAccounts;
+            results.sort((a, b) => ('' + a.name).localeCompare(b.name));
+            return results;
+          },
           filteredCollections() {
             const results = [];
             for (const [contract, item] of Object.entries(this.collections)) {
@@ -710,6 +853,36 @@
 
         // --- METHODS ---
         methods: {
+          checkFormValidity() {
+            const valid = this.$refs.form.checkValidity()
+            this.newAddressState = valid
+            console.log("checkFormValidity: " + valid);
+            return valid
+          },
+          newAddressResetModal() {
+            this.newAddress = ''
+            this.newAddressState = null
+          },
+          newAddressHandleOk(bvModalEvent) {
+            // Prevent modal from closing
+            bvModalEvent.preventDefault()
+            // Trigger submit handler
+            this.newAddressHandleSubmit()
+          },
+          newAddressHandleSubmit() {
+            // Exit when the form isn't valid
+            if (!this.checkFormValidity()) {
+              return
+            }
+            // Push the name to submitted names
+            // this.submittedNames.push(this.name)
+            console.log("Adding: " + this.newAddress);
+            // Hide the modal manually
+            this.$nextTick(() => {
+              this.$bvModal.hide('new-address-modal-prevent-closing')
+            })
+          },
+
           getSecondaryCollectionsForOwner(owner) {
             const results = [];
             if (owner in this.secondaryData) {
@@ -808,8 +981,10 @@
             this.selectedMainTable = {};
             localStorage.selectedMainTable = JSON.stringify(this.selectedMainTable);
           },
-          settingsUpdated() {
-            localStorage.settings = JSON.stringify(this.settings);
+          saveSettings() {
+            console.log("saveSettings BEFORE: " + JSON.stringify(localStorage.myNFTsSettings));
+            localStorage.myNFTsSettings = JSON.stringify(this.settings);
+            console.log("saveSettings AFTER : " + JSON.stringify(localStorage.myNFTsSettings));
           },
           async addressesUpdated() {
             const db0 = new Dexie(this.db.name);
@@ -869,7 +1044,7 @@
               document.getSelection().addRange(selected);
             }
           },
-          async addCollection(collection) {
+          async addAccount(collection) {
             Vue.set(this.collections, collection.contract, {
               name: collection.name,
               slug: collection.slug,
@@ -906,7 +1081,7 @@
             db0.close();
           },
           async doSearchCollections(filter) {
-            this.settingsUpdated();
+            this.saveSettings();
             let continuation = null;
             const results = [];
             do {
@@ -1207,19 +1382,23 @@
           if ('selectedMainTable' in localStorage) {
             this.selectedMainTable = JSON.parse(localStorage.selectedMainTable);
           }
-          // if ('settings' in localStorage) {
-          //   // console.log("mounted - before - this.settings: " + JSON.stringify(this.settings, null, 2));
-          //   // console.log("mounted - before - localStorage.settings: " + localStorage.settings);
-          //   this.settings = { ...this.settings, ...JSON.parse(localStorage.settings) };
-          //
-          //   if (this.settings.txs.currentPage > 1) {
-          //     this.settings.txs.currentPage = 1;
-          //   }
-          //   if (this.settings.addressTable.currentPage > 1) {
-          //     this.settings.addressTable.currentPage = 1;
-          //   }
-          //   console.log("mounted - after: " + JSON.stringify(this.settings, null, 2));
-          // }
+          if ('myNFTsSettings' in localStorage) {
+            // console.log("mounted - before - this.settings: " + JSON.stringify(this.settings, null, 2));
+            // console.log("mounted - before - localStorage.myNFTsSettings: " + localStorage.myNFTsSettings);
+            const tempSettings = JSON.parse(localStorage.myNFTsSettings);
+            if ('version' in tempSettings && tempSettings.version == this.settings.version) {
+              this.settings = tempSettings;
+              // this.settings = { ...this.settings, ...JSON.parse(localStorage.myNFTsSettings) };
+              // this.settings.currentPage = 1;
+              // if (this.settings.txs.currentPage > 1) {
+              //   this.settings.txs.currentPage = 1;
+              // }
+              // if (this.settings.addressTable.currentPage > 1) {
+              //   this.settings.addressTable.currentPage = 1;
+              // }
+            }
+            // console.log("mounted - after: " + JSON.stringify(this.settings, null, 2));
+          }
           (async() => {
             const db0 = new Dexie(this.db.name);
             db0.version(this.db.version).stores(this.db.schemaDefinition);
