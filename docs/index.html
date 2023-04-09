@@ -66,6 +66,18 @@
             </b-card-text>
           </b-card>
 
+          <b-modal id="modal-token" hide-footer size="lg">
+            <template #modal-title>
+              <font size="-1">{{ 'modalTx.hash' }}</font>
+              <!--
+              <b-button size="sm" @click="copyToClipboard(modalTx.hash);" variant="link" class="m-0 p-0" v-b-popover.hover.top="'Copy to clipboard'"><b-icon-clipboard shift-v="+1" font-scale="1.1"></b-icon-clipboard></b-button>
+              <b-button size="sm" :href="'https://etherscan.io/tx/' + modalTx.hash" target="_blank" variant="link" class="m-0 p-0" v-b-popover.hover.top="'View in etherscan.io'">
+                <b-img rounded="0" width="16px" height="16px" src="images/etherscan-logo-circle.svg" blank-color="#777" target="_blank"></b-img>
+              </b-button>
+              -->
+            </template>
+          </b-modal>
+
           <b-card class="m-0 p-0 border-0" body-class="m-1 p-0" header-class="m-0 p-2">
             <div class="d-flex flex-wrap m-0 p-0">
               <div v-if="!settings.editAccounts" class="mt-0 pr-1">
@@ -238,7 +250,7 @@
                     </b-avatar>
                   </div>
                   <div class="ml-2">
-                    {{ data.item.name }}
+                    <b-link @click="showModalToken(data.item);">{{ data.item.name }}</b-link>
                     <br />
                     {{ data.item.collectionName }}
                     <br />
@@ -637,6 +649,11 @@
           resetAdditionalFilters() {
             Vue.set(this.settings, 'filters', {});
             this.saveSettings();
+          },
+          showModalToken(item) {
+            console.log("showModalToken: " + JSON.stringify(item));
+            // this.modalNFTCollection.nftCollection = nftCollection;
+            this.$bvModal.show('modal-token');
           },
           async syncAccounts() {
             console.log("syncAccounts");
