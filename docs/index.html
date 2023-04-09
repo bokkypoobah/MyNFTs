@@ -499,6 +499,13 @@
             version: 3,
           },
           newAddress: null,
+          sync: {
+            section: null,
+            total: null,
+            completed: null,
+            halt: false,
+          },
+
           tabs: [
             { name: 'nfts', text: 'NFTs' },
             { name: 'accounts', text: 'Accounts' },
@@ -506,12 +513,6 @@
           searchCollections: {
             filter: null,
             results: [],
-          },
-          sync: {
-            section: null,
-            total: null,
-            completed: null,
-            halt: false,
           },
           collections: {},
           collectionsData: {},
@@ -954,8 +955,39 @@
             localStorage.myNFTsSettings = JSON.stringify(this.settings);
             console.log("saveSettings: " + JSON.stringify(this.settings));
           },
-          syncAccounts() {
+          async syncAccounts() {
             console.log("syncAccounts");
+            for (const [address, accountItem] of Object.entries(this.settings.accounts)) {
+              console.log("Processing: " + address + " " + JSON.stringify(accountItem));
+              if (accountItem.sync) {
+                let continuation = null;
+                const LIMIT = 20; // 200 max
+                do {
+                  let url = "https://api.reservoir.tools/users/" + address + "/tokens/v7?limit=" + LIMIT + "&includeTopBid=true&includeAttributes=true&includeLastSale=true&includeRawData=true" +
+                    (continuation != null ? "&continuation=" + continuation : '');
+                  console.log("url: " + url);
+                  const data = await fetch(url)
+                    .then(handleErrors)
+                    .then(response => response.json())
+                    .catch(function(error) {
+                       console.log("ERROR - updateCollection: " + error);
+                       // state.sync.error = true;
+                       return [];
+                    });
+                  // continuation = data.continuation;
+                  if (data && data.tokens) {
+                    for (const tokenData of data.tokens) {
+                      console.log(JSON.stringify(tokenData));
+                      // const token = tokenData.token;
+                      // tokens[token.tokenId] = {
+                      //   owner: token.owner,
+                      //   image: token.image,
+                      // };
+                    }
+                  }
+                } while (continuation != null /*&& !state.halt && !state.sync.error */);
+              }
+            }
           },
 
           getSecondaryCollectionsForOwner(owner) {
