@@ -69,10 +69,10 @@
           <b-card class="m-0 p-0 border-0" body-class="m-1 p-0" header-class="m-0 p-2">
             <div class="d-flex flex-wrap m-0 p-0">
               <div class="mt-0 pr-1">
-                <b-form-input type="text" size="sm" v-model.trim="settings.tokenFilter" @change="saveSettings" debounce="600" v-b-popover.hover.top="'Token id and name filter'" placeholder="🔍 token id or name regex" style="min-width: 12.0rem;"></b-form-input>
+                <b-form-input type="text" size="sm" v-model.trim="settings.tokenFilter" @change="saveSettings" debounce="600" v-b-popover.hover.top="'Token id and name filter'" placeholder="🔍 token id/name regex" style="min-width: 8.0rem;"></b-form-input>
               </div>
               <div class="mt-0 pr-1">
-                <b-form-input type="text" size="sm" v-model.trim="settings.collectionfilter" @change="saveSettings" debounce="600" v-b-popover.hover.top="'Collection name filter'" placeholder="🔍 collection name" style="min-width: 12.0rem;"></b-form-input>
+                <b-form-input type="text" size="sm" v-model.trim="settings.collectionfilter" @change="saveSettings" debounce="600" v-b-popover.hover.top="'Collection name filter'" placeholder="🔍 collection name" style="min-width: 8.0rem;"></b-form-input>
               </div>
               <div class="mt-0 flex-grow-1">
               </div>
