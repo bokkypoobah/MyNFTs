@@ -93,12 +93,12 @@
                       label="Address"
                       label-for="name-input"
                       invalid-feedback="Address is required"
-                      :state="newAddressState"
+                      :state="newAddress.addressState"
                     >
                       <b-form-input
                         id="name-input"
-                        v-model="newAddress"
-                        :state="newAddressState"
+                        v-model="newAddress.address"
+                        :state="newAddress.addressState"
                         required
                         placeholder="0x1234..."
                       ></b-form-input>
@@ -508,8 +508,10 @@
             },
             version: 2,
           },
-          newAddress: null,
-          newAddressState: null,
+          newAddress: {
+            address: null,
+            addressState: null,
+          },
           tabs: [
             { name: 'nfts', text: 'NFTs' },
             { name: 'accounts', text: 'Accounts' },
@@ -855,13 +857,13 @@
         methods: {
           checkFormValidity() {
             const valid = this.$refs.form.checkValidity()
-            this.newAddressState = valid
+            this.newAddress.addressState = valid
             console.log("checkFormValidity: " + valid);
             return valid
           },
           newAddressResetModal() {
-            this.newAddress = ''
-            this.newAddressState = null
+            this.newAddress.address = ''
+            this.newAddress.addressState = null
           },
           newAddressHandleOk(bvModalEvent) {
             // Prevent modal from closing
@@ -876,7 +878,7 @@
             }
             // Push the name to submitted names
             // this.submittedNames.push(this.name)
-            console.log("Adding: " + this.newAddress);
+            console.log("Adding: " + JSON.stringify(this.newAddress));
             // Hide the modal manually
             this.$nextTick(() => {
               this.$bvModal.hide('new-address-modal-prevent-closing')
