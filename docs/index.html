@@ -126,8 +126,12 @@
             </b-table>
 
             <b-card-text>
+              pagedFilteredSortedCollections: {{ pagedFilteredSortedCollections }}
+              <!--
               Collections: {{ Object.keys(collections) }}
               Tokens: {{ tokens.length }}
+              filteredTokens: {{ filteredTokens }}
+              -->
             </b-card-text>
 
             <b-card v-if="false && settings.editAccounts" class="mx-5 mt-1 mb-0 p-0 border-1" no-body body-class="m-0 p-0" header-class="m-0 p-0">
@@ -483,6 +487,12 @@
             editAccounts: false,
             accounts: {},
             // mainCollection: "0x31385d3520bCED94f77AaE104b406994D8F2168C", // TODO: null,
+            tokens: {
+              filter: null,
+              currentPage: 1,
+              pageSize: 10,
+              sortOption: 'sortkeyasc',
+            },
             collections: {
               filter: null,
               currentPage: 1,
@@ -501,7 +511,7 @@
               pageSize: 100,
               sortOption: 'countdsc',
             },
-            version: 3,
+            version: 4,
           },
           newAddress: null,
           sync: {
@@ -644,6 +654,35 @@
             });
             return results;
           },
+          filteredTokens() {
+            const results = [];
+            for (const token of this.tokens) {
+              results.push({
+                ...token
+                // contract,
+                // name: item.name,
+                // slug: item.slug,
+                // image: item.image,
+                // tokenCount: item.tokenCount,
+                // onSaleCount: item.onSaleCount,
+                // volume: item.volume,
+                // tokens: item.tokens,
+                // owners: item.owners,
+                // updated: item.updated,
+                // sort: item.sort,
+              });
+            }
+            return results;
+          },
+          filteredSortedTokens() {
+            let results = this.filteredTokens;
+            return results;
+          },
+          pagedFilteredSortedCollections() {
+            return this.filteredSortedTokens.slice((this.settings.collections.currentPage - 1) * this.settings.collections.pageSize, this.settings.collections.currentPage * this.settings.collections.pageSize);
+          },
+
+
 
           filteredCollections() {
             const results = [];
