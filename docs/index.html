@@ -158,6 +158,8 @@
                     {{ data.item.collectionName }}
                     <br />
                     {{ data.item.tokenId }}
+                    <br />
+                    {{ data.item.owner }}
                     <!-- Volume: 1d {{ commify(data.item.volume["1day"]) + 'e' }}; 7d {{ commify(data.item.volume["7day"]) + 'e' }}; 30d {{ commify(data.item.volume["30day"]) + 'e' }}; allTime {{ commify(data.item.volume["allTime"]) + 'e' }}; tokens {{ data.item.tokenCount }}; onSale {{ data.item.onSaleCount }} -->
                   </div>
                 </div>
@@ -520,7 +522,7 @@
               filter: null,
               currentPage: 1,
               pageSize: 10,
-              sortOption: 'timestampdsc',
+              sortOption: 'lastsaledsc',
             },
             collections: {
               filter: null,
@@ -575,8 +577,8 @@
           selectedCollections: {},
           selectedMainTable: {},
           tokensSortOptions: [
-            { value: 'timestampasc', text: '▲ Timestamp' },
-            { value: 'timestampdsc', text: '▼ Timestamp' },
+            { value: 'lastsaleasc', text: '▲ Last Sale' },
+            { value: 'lastsaledsc', text: '▼ Last Sale' },
           ],
           collectionsSortOptions: [
             { value: 'nameasc', text: '▲ Name' },
@@ -710,33 +712,19 @@
                   currency: token.lastSale && token.lastSale.price && token.lastSale.price.currency && token.lastSale.price.currency.symbol || null,
                   amountInUSD: token.lastSale && token.lastSale.price && token.lastSale.price.amount && token.lastSale.price.amount.usd || null,
                 },
-                // contract,
-                // name: item.name,
-                // slug: item.slug,
-                // image: item.image,
-                // tokenCount: item.tokenCount,
-                // onSaleCount: item.onSaleCount,
-                // volume: item.volume,
-                // tokens: item.tokens,
-                // owners: item.owners,
-                // updated: item.updated,
-                // sort: item.sort,
               });
             }
             return results;
           },
           filteredSortedTokens() {
             let results = this.filteredTokens;
-            // { value: 'timestampasc', text: '▲ Timestamp' },
-            // { value: 'timestampdsc', text: '▼ Timestamp' },
-
-            if (this.settings.tokens.sortOption == 'timestampasc') {
+            if (this.settings.tokens.sortOption == 'lastsaleasc') {
               results.sort((a, b) => {
                 const lastSaleA = a.lastSale && a.lastSale.timestamp || 0;
                 const lastSaleB = b.lastSale && b.lastSale.timestamp || 0;
                 return lastSaleA - lastSaleB;
               });
-            } else if (this.settings.tokens.sortOption == 'timestampdsc') {
+            } else if (this.settings.tokens.sortOption == 'lastsaledsc') {
               results.sort((a, b) => {
                 const lastSaleA = a.lastSale && a.lastSale.timestamp || 0;
                 const lastSaleB = b.lastSale && b.lastSale.timestamp || 0;
@@ -1108,7 +1096,7 @@
                 const tokensData = await db0.cache.where("objectName").equals(address).toArray();
                 if (tokensData.length == 1) {
                   for (const token of tokensData[0].object) {
-                    console.log(JSON.stringify(token));
+                    // console.log(JSON.stringify(token));
                     const contract = ethers.utils.getAddress(token.contract);
                     if (!(contract in collections)) {
                       collections[contract] = {
@@ -1138,8 +1126,8 @@
               }
             }
             db0.close();
-            console.log(JSON.stringify(collections, null, 2));
-            console.log(JSON.stringify(tokens, null, 2));
+            // console.log(JSON.stringify(collections, null, 2));
+            // console.log(JSON.stringify(tokens, null, 2));
             this.collections = collections;
             this.tokens = tokens;
           },
