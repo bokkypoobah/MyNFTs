@@ -146,6 +146,22 @@
                 -->
                 {{ parseInt(data.index) + ((settings.tokens.currentPage - 1) * settings.tokens.pageSize) + 1 }}
               </template>
+              <template #cell(token)="data">
+                <div class="d-flex flex-row">
+                  <div>
+                    <b-avatar rounded variant="light" size="7.0rem" :src="data.item.image">
+                    </b-avatar>
+                  </div>
+                  <div class="ml-2">
+                    {{ data.item.name }}
+                    <br />
+                    {{ data.item.collectionName }}
+                    <br />
+                    {{ data.item.tokenId }}
+                    <!-- Volume: 1d {{ commify(data.item.volume["1day"]) + 'e' }}; 7d {{ commify(data.item.volume["7day"]) + 'e' }}; 30d {{ commify(data.item.volume["30day"]) + 'e' }}; allTime {{ commify(data.item.volume["allTime"]) + 'e' }}; tokens {{ data.item.tokenCount }}; onSale {{ data.item.onSaleCount }} -->
+                  </div>
+                </div>
+              </template>
             </b-table>
 
             <b-card v-if="false && settings.editAccounts" class="mx-5 mt-1 mb-0 p-0 border-1" no-body body-class="m-0 p-0" header-class="m-0 p-0">
@@ -606,7 +622,7 @@
           ],
           tokensFields: [
             { key: 'number', label: '#', sortable: false, thStyle: 'width: 5%;', tdClass: 'text-truncate' },
-            { key: 'tokenId', label: 'Id', sortable: false, thStyle: 'width: 45%;', tdClass: 'text-truncate' },
+            { key: 'token', label: 'Token', sortable: false, thStyle: 'width: 45%;', tdClass: 'text-truncate' },
             // { key: 'group', label: 'Group', sortable: false, thStyle: 'width: 20%;', tdClass: 'text-truncate' },
             { key: 'name', label: 'Name', sortable: false, thStyle: 'width: 50%;', tdClass: 'text-truncate' },
             // { key: 'ensName', label: 'ENS Name', sortable: false, thStyle: 'width: 15%;', tdClass: 'text-truncate' },
@@ -684,8 +700,10 @@
           filteredTokens() {
             const results = [];
             for (const token of this.tokens) {
+              const collectionName = this.collections[token.contract] && this.collections[token.contract].name || null;
               results.push({
                 ...token,
+                collectionName,
                 lastSale: {
                   timestamp: token.lastSale && token.lastSale.timestamp || null,
                   amount: token.lastSale && token.lastSale.price && token.lastSale.price.amount && token.lastSale.price.amount.native || null,
