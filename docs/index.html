@@ -713,11 +713,17 @@
           },
           filteredTokens() {
             // settings.tokenFilter
+            const tokenFilterRegex = this.settings.tokenFilter && this.settings.tokenFilter.length > 0 ? new RegExp(this.settings.tokenFilter, 'i') : null;
             const searchCollectionLower = this.settings.collectionfilter && this.settings.collectionfilter.toLowerCase() || null;
             const results = [];
             for (const token of this.tokens) {
               let include = true;
               const collectionName = this.collections[token.contract] && this.collections[token.contract].name || null;
+              if (tokenFilterRegex) {
+                if (!tokenFilterRegex.test(token.name) && !tokenFilterRegex.test(token.tokenId.toString())) {
+                  include = false;
+                }
+              }
               if (searchCollectionLower) {
                 if (!(collectionName && collectionName.toLowerCase().includes(searchCollectionLower))) {
                   include = false;
