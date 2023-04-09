@@ -1151,14 +1151,14 @@
               .catch(err => console.error(err));
             console.log("results: " + JSON.stringify(results));
 
-            this.$bvToast.toast("Please retry after 5 minutes if required", {
-              title: 'Metadata Refresh Requested',
+            this.$bvToast.toast("Please Sync after a few minutes", {
+              title: 'Metadata refresh ' + token.contract.substring(0, 12) + '...:' + token.tokenId.substring(0, 12),
               autoHideDelay: 5000,
               appendToast: true,
             });
-            setTimeout(function() {
-              store.dispatch('data/refreshTokenMetadata', token);
-            }, 5000);
+            // setTimeout(function() {
+            //   store.dispatch('data/refreshTokenMetadata', token);
+            // }, 5000);
             // alert("Request sent and will data will be auto-refreshed in 5 seconds. Manually refresh the locally cached token metadata if required")
           },
 
