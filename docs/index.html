@@ -473,22 +473,7 @@
           settings: {
             tabIndex: 0,
             editAccounts: false,
-            accounts: {
-              "0x1234": {
-                name: "Aaaah",
-                ensName: "Aaaaah.eth",
-                group: "AAA",
-                sync: true,
-                include: true,
-              },
-              "0x2345": {
-                name: "Baaah",
-                ensName: "Baaaah.eth",
-                group: "BBB",
-                sync: true,
-                include: true,
-              },
-            },
+            accounts: {},
             // mainCollection: "0x31385d3520bCED94f77AaE104b406994D8F2168C", // TODO: null,
             collections: {
               filter: null,
@@ -508,7 +493,7 @@
               pageSize: 100,
               sortOption: 'countdsc',
             },
-            version: 2,
+            version: 3,
           },
           newAddress: null,
           tabs: [
@@ -1062,9 +1047,8 @@
             localStorage.selectedMainTable = JSON.stringify(this.selectedMainTable);
           },
           saveSettings() {
-            // console.log("saveSettings BEFORE: " + JSON.stringify(localStorage.myNFTsSettings));
             localStorage.myNFTsSettings = JSON.stringify(this.settings);
-            console.log("saveSettings AFTER : " + JSON.stringify(localStorage.myNFTsSettings));
+            console.log("saveSettings: " + JSON.stringify(this.settings));
           },
           async addressesUpdated() {
             const db0 = new Dexie(this.db.name);
