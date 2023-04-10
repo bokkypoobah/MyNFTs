@@ -68,7 +68,7 @@
 
           <b-modal id="modal-token" hide-footer size="lg">
             <template #modal-title>
-              <font size="-1">{{ modalToken.token.name }}</font>
+              <font size="-1">{{ modalToken.token && modalToken.token.name }}</font>
               <!--
               <b-button size="sm" @click="copyToClipboard(modalTx.hash);" variant="link" class="m-0 p-0" v-b-popover.hover.top="'Copy to clipboard'"><b-icon-clipboard shift-v="+1" font-scale="1.1"></b-icon-clipboard></b-button>
               <b-button size="sm" :href="'https://etherscan.io/tx/' + modalTx.hash" target="_blank" variant="link" class="m-0 p-0" v-b-popover.hover.top="'View in etherscan.io'">
@@ -78,7 +78,7 @@
             </template>
             <div class="d-flex flex-row">
               <div>
-                <b-avatar v-if="modalToken && modalToken.token" rounded variant="light" size="8.0rem" :src="modalToken.token.image">
+                <b-avatar v-if="modalToken.token" rounded variant="light" size="8.0rem" :src="modalToken.token.image">
                 </b-avatar>
               </div>
               <div class="ml-2">
@@ -91,6 +91,15 @@
                 {{ modalToken.token && modalToken.token.ownerName }}
                 <br />
                 <b-button size="sm" @click="requestReservoirAPITokenMetadataRefresh(modalToken.token)" variant="link" v-b-popover.hover.top="'Request a metadata refresh on the Reservoir API. Re-sync after a few minutes'"><b-icon-arrow-clockwise shift-v="+1" font-scale="1.2"></b-icon-arrow-clockwise></b-button>
+                <br />
+                <b-button v-if="modalToken.token" size="sm" :href="'https://opensea.io/assets/ethereum/' + modalToken.token.contract + '/' + modalToken.token.tokenId" target="_blank" variant="link" v-b-popover.hover.top="'View in opensea.io'">
+                  <b-avatar rounded variant="light" size="0.9rem" src="images/opensea.svg">
+                  </b-avatar>
+                </b-button>
+                <b-button v-if="modalToken.token" size="sm" :href="'https://etherscan.io/token/' + modalToken.token.contract + ((modalToken.token.kind == 'erc721' || modalToken.token.kind== 'erc1155') ? ('?a=' + modalToken.token.tokenId) : '')" target="_blank" variant="link" v-b-popover.hover.top="'View in opensea.io'">
+                  <b-avatar rounded variant="light" size="0.9rem" src="images/etherscan-logo-circle.svg">
+                  </b-avatar>
+                </b-button>
               </div>
             </div>
           </b-modal>
