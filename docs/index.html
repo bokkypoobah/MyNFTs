@@ -134,8 +134,31 @@
               <div class="mt-0 flex-grow-1">
               </div>
               <div v-if="settings.editAccounts" class="mt-0 pr-1">
+                <b-dropdown size="sm" variant="link" v-b-popover.hover.top="'Export/Import accounts'">
+                  <template #button-content>
+                    <b-icon-file-earmark-spreadsheet shift-v="+1" font-scale="1.2"></b-icon-file-earmark-spreadsheet>
+                  </template>
+                  <b-dropdown-item @click="exportAccounts" >Export</b-dropdown-item>
+                  <b-dropdown-item @click="showModalAccountsImport();">Import</b-dropdown-item>
+                </b-dropdown>
+
+                <!--
+                Account <b-button v-b-modal.new-address-modal-prevent-closing variant="link" v-b-popover.hover.top="'Add new account'"><b-icon-plus-square shift-v="+1" font-scale="0.8"></b-icon-plus-square></b-button>
+                <b-modal id="new-address-modal-prevent-closing" ref="modal" title="New Address" @show="newAddressResetModal" @hidden="newAddressResetModal" @ok="newAddressHandleOk">
+                  <form ref="form" @submit.stop.prevent="newAddressHandleSubmit">
+                    <b-form-group label="Address" label-for="name-input" :state="newAddressState" invalid-feedback="Please enter a valid Ethereum address">
+                      <b-form-input id="name-input" v-model="newAddress" :state="newAddressState" required placeholder="0x1234..."></b-form-input>
+                    </b-form-group>
+                  </form>
+                </b-modal>
+                -->
+
+              </div>
+              <!--
+              <div v-if="settings.editAccounts" class="mt-0 pr-1">
                 <b-button size="sm" @click="exportAccounts" variant="link" v-b-popover.hover.top="'Export accounts'"><b-icon-file-earmark-spreadsheet shift-v="+1" font-scale="1.2"></b-icon-file-earmark-spreadsheet></b-button>
               </div>
+              -->
               <div class="mt-0 flex-grow-1">
               </div>
               <div v-if="!settings.editAccounts && !sync.section" class="mt-0 pr-1">
@@ -672,6 +695,19 @@
           resetAdditionalFilters() {
             Vue.set(this.settings, 'filters', {});
             this.saveSettings();
+          },
+          async showModalAccountsImport(item) {
+            // console.log("showModalAccountsImport: " + JSON.stringify(item));
+            // let url = "https://api.reservoir.tools/collections/v5?contract=" + item.contract;
+            // console.log(url);
+            // const data = await fetch(url).then(response => response.json());
+            // const collection = data.collections && data.collections.length == 1 && data.collections[0] || {};
+            // this.modalToken = {
+            //   token: item,
+            //   collection,
+            // };
+            // console.log(JSON.stringify(this.modalToken, null, 2));
+            this.$bvModal.show('modal-token');
           },
           async showModalToken(item) {
             // console.log("showModalToken: " + JSON.stringify(item));
