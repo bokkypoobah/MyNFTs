@@ -784,6 +784,7 @@
                     }
                     this.sync.completed = tokens.length;
                   }
+                  await delay(1000); // TODO: Adjust to avoid errors 429 Too Many Requests.
                 } while (continuation != null && !this.sync.halt /*&& !state.sync.error */);
                 if (!this.sync.halt) {
                   console.log("tokens: " + JSON.stringify(tokens, null, 2));
