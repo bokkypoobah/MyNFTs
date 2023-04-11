@@ -60,7 +60,7 @@
           <b-alert v-if="false" size="sm" dismissible variant="warning" show class="m-1 my-0">
             Warning: This is experimental unaudited software. Revoke permissions when not required, at this early stage.
           </b-alert>
-          <b-card class="m-2 p-1" header-class="warningheader" header="Welcome" v-if="!coinbase">
+          <b-card v-if="false" class="m-2 p-1" header-class="warningheader" header="Welcome" v-if="!coinbase">
             <b-card-text>
               Please install the MetaMask extension, connect to the Ethereum mainnet and refresh this page. Then click the [Connect] button on the top right.
             </b-card-text>
@@ -130,6 +130,11 @@
               </div>
               <div v-if="!sync.section" class="mt-0 pr-1">
                 <b-button size="sm" :pressed.sync="settings.editAccounts" @click="saveSettings" :variant="settings.editAccounts ? 'danger' : 'link'" v-b-popover.hover.top="settings.editAccounts ? 'End adding/editing accounts. Click Sync to apply changes' : 'Add/Edit accounts'"><b-icon-pencil shift-v="+1" font-scale="1.0"></b-icon-pencil></b-button>
+              </div>
+              <div class="mt-0 flex-grow-1">
+              </div>
+              <div v-if="settings.editAccounts" class="mt-0 pr-1">
+                <b-button size="sm" @click="exportAccounts" variant="link" v-b-popover.hover.top="'Export accounts'"><b-icon-file-earmark-spreadsheet shift-v="+1" font-scale="1.2"></b-icon-file-earmark-spreadsheet></b-button>
               </div>
               <div class="mt-0 flex-grow-1">
               </div>
@@ -292,6 +297,9 @@
                   </div>
                 </div>
               </template>
+              <template #cell(info)="data">
+                {{ data.item.lastSale }}
+              </template>
             </b-table>
           </b-card>
         </b-card>
@@ -369,7 +377,7 @@
           tokensFields: [
             { key: 'number', label: '#', sortable: false, thStyle: 'width: 5%;', tdClass: 'text-truncate' },
             { key: 'token', label: 'Token', sortable: false, thStyle: 'width: 45%;', tdClass: 'text-truncate' },
-            { key: 'name', label: 'Name', sortable: false, thStyle: 'width: 50%;', tdClass: 'text-truncate' },
+            { key: 'info', label: 'Info', sortable: false, thStyle: 'width: 50%;', tdClass: 'text-truncate' },
           ],
           groupsFilterFields: [
             { key: 'select', label: '', thStyle: 'width: 15%;' },
@@ -862,14 +870,31 @@
             document.body.appendChild(link); // Required for FF
             link.click();
           },
-          exportAddresses() {
-            console.log("exportAddresses");
-            var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.addresses));
+          exportAccounts() {
+            console.log("exportAccounts");
+            const rows = [
+                ["No", "Address", "Name", "ENSName", "Group", "Sync", "Include"],
+            ];
+            let i = 1;
+            for (const result of this.filteredSortedAccounts) {
+              rows.push([
+                i,
+                result.address,
+                result.name,
+                result.ensName,
+                result.group,
+                result.sync ? "y" : "n",
+                result.include ? "y" : "n",
+              ]);
+              i++;
+            }
+            let csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
+            var encodedUri = encodeURI(csvContent);
             var link = document.createElement("a");
-            link.setAttribute("href", dataStr);
-            link.setAttribute("download", "addresses.json");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "mynfts_account_export-" + moment().format("YYYY-MM-DD-HH-mm-ss") + ".csv");
             document.body.appendChild(link); // Required for FF
-            link.click();
+            link.click(); // This will download the data with the specified file name
           },
           copyToClipboard(str) {
             // https://github.com/30-seconds/30-seconds-of-code/blob/master/snippets/copyToClipboard.md
