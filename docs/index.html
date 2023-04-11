@@ -551,21 +551,29 @@
           },
           filteredAccounts() {
             const results = [];
+            const filterRegex = this.settings.accountsTable.filter && this.settings.accountsTable.filter.length > 0 ? new RegExp(this.settings.accountsTable.filter, 'i') : null;
             for (const [address, item] of Object.entries(this.settings.accounts)) {
-              results.push({
-                address,
-                name: item.name,
-                ensName: item.ensName,
-                group: item.group,
-                sync: item.sync,
-                include: item.include,
-              });
+              let include = true;
+              if (filterRegex) {
+                if (!filterRegex.test(item.name) && !filterRegex.test(item.group) && !filterRegex.test(address)) {
+                  include = false;
+                }
+              }
+              if (include) {
+                results.push({
+                  address,
+                  name: item.name,
+                  ensName: item.ensName,
+                  group: item.group,
+                  sync: item.sync,
+                  include: item.include,
+                });
+              }
             }
             return results;
           },
           filteredSortedAccounts() {
             let results = this.filteredAccounts;
-
             if (this.settings.accountsTable.sortOption == 'groupnameasc') {
               results.sort((a, b) => {
                 if (('' + a.group).localeCompare(b.group) == 0) {
@@ -619,14 +627,10 @@
                 }
               });
             }
-            console.log(JSON.stringify(results, null, 2));
             return results;
           },
           pagedFilteredSortedAccounts() {
-            // return this.filteredSortedTokens.slice((this.settings.tokens.currentPage - 1) * this.settings.tokens.pageSize, this.settings.tokens.currentPage * this.settings.tokens.pageSize);
-            const result = this.filteredSortedAccounts.slice((this.settings.accountsTable.currentPage - 1) * this.settings.accountsTable.pageSize, this.settings.accountsTable.currentPage * this.settings.accountsTable.pageSize);
-            console.log(JSON.stringify(result, null, 2));
-            return result;
+            return this.filteredSortedAccounts.slice((this.settings.accountsTable.currentPage - 1) * this.settings.accountsTable.pageSize, this.settings.accountsTable.currentPage * this.settings.accountsTable.pageSize);
           },
           filteredTokens() {
             const tokenFilterRegex = this.settings.tokensTable.tokenFilter && this.settings.tokensTable.tokenFilter.length > 0 ? new RegExp(this.settings.tokensTable.tokenFilter, 'i') : null;
@@ -710,10 +714,7 @@
             return results;
           },
           pagedFilteredSortedTokens() {
-            // return this.filteredSortedTokens.slice((this.settings.tokens.currentPage - 1) * this.settings.tokens.pageSize, this.settings.tokens.currentPage * this.settings.tokens.pageSize);
-            const result = this.filteredSortedTokens.slice((this.settings.tokensTable.currentPage - 1) * this.settings.tokensTable.pageSize, this.settings.tokensTable.currentPage * this.settings.tokensTable.pageSize);
-            // console.log(JSON.stringify(result, null, 2));
-            return result;
+            return this.filteredSortedTokens.slice((this.settings.tokensTable.currentPage - 1) * this.settings.tokensTable.pageSize, this.settings.tokensTable.currentPage * this.settings.tokensTable.pageSize);
           },
         },
 
