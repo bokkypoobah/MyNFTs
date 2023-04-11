@@ -107,6 +107,21 @@
             </div>
           </b-modal>
 
+          <b-modal id="modal-accounts-import" hide-footer size="lg">
+            <template #modal-title>
+              <font size="-1">Accounts Import</font>
+              <!--
+              <b-button size="sm" @click="copyToClipboard(modalTx.hash);" variant="link" class="m-0 p-0" v-b-popover.hover.top="'Copy to clipboard'"><b-icon-clipboard shift-v="+1" font-scale="1.1"></b-icon-clipboard></b-button>
+              <b-button size="sm" :href="'https://etherscan.io/tx/' + modalTx.hash" target="_blank" variant="link" class="m-0 p-0" v-b-popover.hover.top="'View in etherscan.io'">
+                <b-img rounded="0" width="16px" height="16px" src="images/etherscan-logo-circle.svg" blank-color="#777" target="_blank"></b-img>
+              </b-button>
+              -->
+            </template>
+            <b-form-group label="Restore:" label-for="restore-from-backup-browse" label-size="sm" label-cols-sm="2" label-align-sm="right" :description="'Select backup .csv file from your local computer to restore'" class="mx-0 my-1 p-0">
+              <b-form-file size="sm" id="restore-from-backup-browse" v-model="restoreFile" @change="backupFilesChange($event.target.name, $event.target.files)" accept=".tsv" class="w-75"></b-form-file>
+            </b-form-group>
+          </b-modal>
+
           <b-card class="m-0 p-0 border-0" body-class="m-1 p-0" header-class="m-0 p-2">
             <div class="d-flex flex-wrap m-0 p-0">
               <div v-if="!settings.editAccounts" class="mt-0 pr-1">
@@ -339,6 +354,7 @@
             version: 8,
           },
           newAddress: null,
+          restoreFile: null,
           sync: {
             section: null,
             total: null,
@@ -707,7 +723,7 @@
             //   collection,
             // };
             // console.log(JSON.stringify(this.modalToken, null, 2));
-            this.$bvModal.show('modal-token');
+            this.$bvModal.show('modal-accounts-import');
           },
           async showModalToken(item) {
             // console.log("showModalToken: " + JSON.stringify(item));
@@ -906,11 +922,11 @@
               ]);
               i++;
             }
-            let csvContent = "data:text/csv;charset=utf-8," + rows.map(e => e.join(",")).join("\n");
-            var encodedUri = encodeURI(csvContent);
+            let tsvContent = "data:text/tsv;charset=utf-8," + rows.map(e => e.join("\t")).join("\n");
+            var encodedUri = encodeURI(tsvContent);
             var link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "mynfts_account_export-" + moment().format("YYYY-MM-DD-HH-mm-ss") + ".csv");
+            link.setAttribute("download", "mynfts_account_export-" + moment().format("YYYY-MM-DD-HH-mm-ss") + ".tsv");
             document.body.appendChild(link); // Required for FF
             link.click(); // This will download the data with the specified file name
           },
