@@ -120,6 +120,18 @@
             <b-form-group label="Restore:" label-for="restore-from-backup-browse" label-size="sm" label-cols-sm="2" label-align-sm="right" :description="'Select backup .tsv file from your local computer to restore'" class="mx-0 my-1 p-0">
               <b-form-file size="sm" id="restore-from-backup-browse" v-model="restoreFile" @change="backupFilesChange($event.target.name, $event.target.files)" accept=".tsv" class="w-75"></b-form-file>
             </b-form-group>
+            <font v-if="restoreAddresses" size="-2">
+              <b-table small fixed striped sticky-header="200px" :fields="accountsImportAddressesFields" :items="restoreAddresses" head-variant="light">
+                <!--
+                <template #cell(select)="data">
+                  <b-form-checkbox size="sm" :checked="(settings.filters['groups'] && settings.filters['groups'][data.item.group]) ? 1 : 0" value="1" @change="filterChanged('groups', data.item.group)"></b-form-checkbox>
+                </template>
+                <template #cell(group)="data">
+                  {{ data.item.group }}
+                </template>
+              -->
+              </b-table>
+            </font>
           </b-modal>
 
           <b-card class="m-0 p-0 border-0" body-class="m-1 p-0" header-class="m-0 p-2">
@@ -217,7 +229,7 @@
                         </template>
                         <template #cell(group)="data">
                           {{ data.item.group }}
-                      </template>
+                        </template>
                       </b-table>
                     </font>
                   </b-card-body>
@@ -355,6 +367,7 @@
           },
           newAddress: null,
           restoreFile: null,
+          restoreAddresses: null,
           sync: {
             section: null,
             total: null,
@@ -414,6 +427,13 @@
             { key: 'select', label: '', thStyle: 'width: 15%;' },
             { key: 'collectionName', label: 'Collection', sortable: true, tdClass: 'text-truncate' },
             { key: 'count', label: '#', sortable: true, thStyle: 'width: 20%;', thClass: 'text-right', tdClass: 'text-right' },
+          ],
+          accountsImportAddressesFields: [
+            { key: 'address', label: 'Address', sortable: true, thStyle: 'width: 40%;', tdClass: 'text-truncate' },
+            { key: 'name', label: 'Name', sortable: true, thStyle: 'width: 20%;', tdClass: 'text-truncate' },
+            { key: 'group', label: 'Group', sortable: true, thStyle: 'width: 20%;', tdClass: 'text-truncate' },
+            { key: 'sync', label: 'Sync', sortable: true, thStyle: 'width: 10%;', tdClass: 'text-truncate' },
+            { key: 'include', label: 'Include', sortable: true, thStyle: 'width: 10%;', tdClass: 'text-truncate' },
           ],
           db: {
             name: "mynfts089",
@@ -932,18 +952,18 @@
           },
           async backupFilesChange(fileName, fileList) {
             const reader = new FileReader();
-            this.restoreAccountsData = [];
+            this.restoreAddresses = [];
             const t = this;
             reader.onload = function (event) {
               const data = event.target.result;
               const lines = data.split("\n");
               for (const line of lines) {
                 const fields = line.split("\t");
-                console.log(JSON.stringify(fields));
-                // if (fields[0] == "Account") {
-                //   const [dataType, accountIndex, account, accountType, ensName, mine, sync, report, junk, group, name, tags, notes]  = fields;
-                //   t.restoreAccountsData.push({ dataType, account, accountType: accountType || null, mine: mine == "y", sync: sync == "y", report: report == "y", junk: junk == "y", group: group || null, name: name || null, tags: tags || [], notes: notes || null });
-                // }
+                // console.log(JSON.stringify(fields));
+                if (fields[0] != "No") {
+                  const [number, address, name, ensName, group, sync, include]  = fields;
+                  t.restoreAddresses.push({ address, name, ensName, group, sync, include });
+                }
               }
             };
             await reader.readAsText(fileList[0]);
