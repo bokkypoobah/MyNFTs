@@ -51,6 +51,9 @@
             <em v-b-popover.hover.bottom="'gm gm gm'">My NFTs</em>
           </b-navbar-brand>
           <b-navbar-nav class="ml-auto">
+            <b-nav-item size="sm" @click="settings.tabIndex = 0; saveSettings()" :active="settings.tabIndex == 0" active-class="active" v-b-popover.hover="'View NFTs'">NFTs</b-nav-item>
+            <b-nav-item size="sm" @click="settings.tabIndex = 1; saveSettings()" :active="settings.tabIndex == 1" active-class="active" v-b-popover.hover="'View collections'">Collections</b-nav-item>
+            <b-nav-item size="sm" @click="settings.tabIndex = 2; saveSettings()" :active="settings.tabIndex == 2" active-class="active" v-b-popover.hover="'View/edit accounts'">Accounts</b-nav-item>
             <!-- <b-avatar v-if="coinbase && coinbase != ensOrAddress(coinbase)" rounded variant="light" size="2.0rem" :src="'https://metadata.ens.domains/mainnet/avatar/' + ensOrAddress(coinbase)" v-b-popover.hover="'Your ENS avatar if set'"></b-avatar>
             <b-button size="sm" variant="primary" class="ml-1" @click="processIt('connect')" v-b-popover.hover.bottom="'Click to update wallet'">{{ coinbase ? ensOrAddress(coinbase, 32) : 'Connect' }}</b-button> -->
           </b-navbar-nav>
@@ -125,18 +128,18 @@
             </b-form-group>
           </b-modal>
 
-          <b-card class="m-0 p-0 border-0" body-class="m-1 p-0" header-class="m-0 p-2">
+          <b-card v-if="settings.tabIndex == 0" class="m-0 p-0 border-0" body-class="m-1 p-0" header-class="m-0 p-2">
             <div class="d-flex flex-wrap m-0 p-0">
-              <div v-if="!settings.editAccounts" class="mt-0 pr-1">
-                <b-form-input type="text" size="sm" v-model.trim="settings.tokenFilter" @change="saveSettings" debounce="600" v-b-popover.hover.top="'Token id and name filter'" placeholder="🔍 token id/name regex" style="min-width: 8.0rem;"></b-form-input>
+              <div class="mt-0 pr-1">
+                <b-form-input type="text" size="sm" v-model.trim="settings.tokensTable.tokenFilter" @change="saveSettings" debounce="600" v-b-popover.hover.top="'Token id and name filter'" placeholder="🔍 token id/name regex" style="min-width: 8.0rem;"></b-form-input>
               </div>
-              <div v-if="!settings.editAccounts" class="mt-0 pr-1">
-                <b-form-input type="text" size="sm" v-model.trim="settings.collectionfilter" @change="saveSettings" debounce="600" v-b-popover.hover.top="'Collection name filter'" placeholder="🔍 collection name" style="min-width: 8.0rem;"></b-form-input>
+              <div class="mt-0 pr-1">
+                <b-form-input type="text" size="sm" v-model.trim="settings.tokensTable.collectionfilter" @change="saveSettings" debounce="600" v-b-popover.hover.top="'Collection name filter'" placeholder="🔍 collection name" style="min-width: 8.0rem;"></b-form-input>
               </div>
-              <div v-if="!settings.editAccounts" class="mt-0 pr-1">
+              <div class="mt-0 pr-1">
                 <b-button size="sm" :pressed.sync="settings.showAdditionalFilters" @click="saveSettings" variant="link" v-b-popover.hover.top="'Additional filters'"><span v-if="settings.showAdditionalFilters"><b-icon-funnel-fill shift-v="+1" font-scale="1.0"></b-icon-funnel-fill></span><span v-else><b-icon-funnel shift-v="+1" font-scale="1.0"></b-icon-funnel></span></b-button>
               </div>
-              <div v-if="!settings.editAccounts && Object.keys(settings.filters).length > 0" class="mt-0 pr-1">
+              <div v-if="Object.keys(settings.filters).length > 0" class="mt-0 pr-1">
                 <b-button size="sm" @click="resetAdditionalFilters();" variant="link" class="m-0 p-0" v-b-popover.hover.top="'Reset additional filters'">
                   <b-iconstack shift-v="-1" font-scale="1">
                     <b-icon stacked icon="funnel-fill" variant="info" scale="1"></b-icon>
@@ -146,43 +149,12 @@
               </div>
               <div class="mt-0 flex-grow-1">
               </div>
+              <div class="mt-0 flex-grow-1">
+              </div>
               <div v-if="!sync.section" class="mt-0 pr-1">
-                <b-button size="sm" :pressed.sync="settings.editAccounts" @click="saveSettings" :variant="settings.editAccounts ? 'danger' : 'link'" v-b-popover.hover.top="settings.editAccounts ? 'End adding/editing accounts. Click Sync to apply changes' : 'Add/Edit accounts'"><b-icon-pencil shift-v="+1" font-scale="1.0"></b-icon-pencil></b-button>
+                <b-button size="sm" @click="syncAccounts()" variant="primary" v-b-popover.hover.top="'Select NFT collections to for accounts'">Sync</b-button>
               </div>
-              <div class="mt-0 flex-grow-1">
-              </div>
-              <div v-if="settings.editAccounts" class="mt-0 pr-1">
-                <b-dropdown size="sm" variant="link" v-b-popover.hover.top="'Export/Import accounts'">
-                  <template #button-content>
-                    <b-icon-file-earmark-spreadsheet shift-v="+1" font-scale="1.2"></b-icon-file-earmark-spreadsheet>
-                  </template>
-                  <b-dropdown-item @click="exportAccounts" >Export</b-dropdown-item>
-                  <b-dropdown-item @click="showModalAccountsImport();">Import</b-dropdown-item>
-                </b-dropdown>
-
-                <!--
-                Account <b-button v-b-modal.new-address-modal-prevent-closing variant="link" v-b-popover.hover.top="'Add new account'"><b-icon-plus-square shift-v="+1" font-scale="0.8"></b-icon-plus-square></b-button>
-                <b-modal id="new-address-modal-prevent-closing" ref="modal" title="New Address" @show="newAddressResetModal" @hidden="newAddressResetModal" @ok="newAddressHandleOk">
-                  <form ref="form" @submit.stop.prevent="newAddressHandleSubmit">
-                    <b-form-group label="Address" label-for="name-input" :state="newAddressState" invalid-feedback="Please enter a valid Ethereum address">
-                      <b-form-input id="name-input" v-model="newAddress" :state="newAddressState" required placeholder="0x1234..."></b-form-input>
-                    </b-form-group>
-                  </form>
-                </b-modal>
-                -->
-
-              </div>
-              <!--
-              <div v-if="settings.editAccounts" class="mt-0 pr-1">
-                <b-button size="sm" @click="exportAccounts" variant="link" v-b-popover.hover.top="'Export accounts'"><b-icon-file-earmark-spreadsheet shift-v="+1" font-scale="1.2"></b-icon-file-earmark-spreadsheet></b-button>
-              </div>
-              -->
-              <div class="mt-0 flex-grow-1">
-              </div>
-              <div v-if="!settings.editAccounts && !sync.section" class="mt-0 pr-1">
-                <b-button size="sm" :disabled="settings.editAccounts" @click="syncAccounts()" variant="primary" v-b-popover.hover.top="'Select NFT collections to for accounts'">Sync</b-button>
-              </div>
-              <div v-if="!settings.editAccounts" class="mt-1" style="width: 200px;">
+              <div class="mt-1" style="width: 200px;">
                 <b-progress v-if="sync.section != null" height="1.5rem" :max="sync.total" show-progress :animated="sync.section != null" :variant="sync.section != null ? 'success' : 'secondary'" v-b-popover.hover.top="'Click the button on the right to stop. This process can be continued later'">
                   <b-progress-bar :value="sync.completed">
                     {{ sync.total == null ? (sync.completed + ' ' + sync.section) : (sync.completed + '/' + sync.total + ' ' + ((sync.completed / sync.total) * 100).toFixed(0) + '% ' + sync.section) }}
@@ -194,22 +166,22 @@
               </div>
               <div class="mt-0 flex-grow-1">
               </div>
-              <div v-if="!settings.editAccounts" class="mt-0 pl-1">
-                <b-form-select size="sm" v-model="settings.tokens.sortOption" @change="saveSettings" :options="tokensSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
+              <div class="mt-0 pl-1">
+                <b-form-select size="sm" v-model="settings.tokensTable.sortOption" @change="saveSettings" :options="tokensSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
               </div>
-              <div v-if="!settings.editAccounts" class="mt-0 pl-1">
+              <div class="mt-0 pl-1">
                 <font size="-2" v-b-popover.hover.top="'# tokens'">{{ filteredSortedTokens.length + '/' + tokens.length }}</font>
               </div>
-              <div v-if="!settings.editAccounts" class="mt-0 pl-1">
-                <b-pagination size="sm" v-model="settings.tokens.currentPage" @input="saveSettings" :total-rows="filteredSortedTokens.length" :per-page="settings.tokens.pageSize" style="height: 0;"></b-pagination>
+              <div class="mt-0 pl-1">
+                <b-pagination size="sm" v-model="settings.tokensTable.currentPage" @input="saveSettings" :total-rows="filteredSortedTokens.length" :per-page="settings.tokensTable.pageSize" style="height: 0;"></b-pagination>
               </div>
-              <div v-if="!settings.editAccounts" class="mt-0 pl-1">
-                <b-form-select size="sm" v-model="settings.tokens.pageSize" @change="saveSettings" :options="pageSizes" v-b-popover.hover.top="'Tokens page size'"></b-form-select>
+              <div class="mt-0 pl-1">
+                <b-form-select size="sm" v-model="settings.tokensTable.pageSize" @change="saveSettings" :options="pageSizes" v-b-popover.hover.top="'Tokens page size'"></b-form-select>
               </div>
             </div>
 
             <!-- ADDITIONAL FILTERS -->
-            <div v-if="!settings.editAccounts && settings.showAdditionalFilters" class="d-flex flex-wrap m-0 p-0">
+            <div v-if="settings.showAdditionalFilters" class="d-flex flex-wrap m-0 p-0">
               <div class="mt-0 pr-1" style="width: 13.0rem;">
                 <b-card no-header no-body class="m-0 mt-1 p-0 border-1">
                   <b-card-body class="m-0 p-0">
@@ -263,42 +235,14 @@
 
             </div>
 
-            <b-table v-if="settings.editAccounts" small fixed striped responsive hover :fields="accountsFields" :items="filteredSortedAccounts" show-empty empty-html="Click [+] above to add new collections" head-variant="light" class="mx-0 my-1">
-              <template #head(address)="data">
-                Account <b-button v-b-modal.new-address-modal-prevent-closing variant="link" v-b-popover.hover.top="'Add new account'"><b-icon-plus-square shift-v="+1" font-scale="0.8"></b-icon-plus-square></b-button>
-                <b-modal id="new-address-modal-prevent-closing" ref="modal" title="New Address" @show="newAddressResetModal" @hidden="newAddressResetModal" @ok="newAddressHandleOk">
-                  <form ref="form" @submit.stop.prevent="newAddressHandleSubmit">
-                    <b-form-group label="Address" label-for="name-input" :state="newAddressState" invalid-feedback="Please enter a valid Ethereum address">
-                      <b-form-input id="name-input" v-model="newAddress" :state="newAddressState" required placeholder="0x1234..."></b-form-input>
-                    </b-form-group>
-                  </form>
-                </b-modal>
-              </template>
-              <template #cell(group)="data">
-                <b-form-input type="text" size="sm" v-model.trim="data.item.group" @change="setAccountField(data.item.address, 'group', $event)" placeholder="group"></b-form-input>
-              </template>
-              <template #cell(name)="data">
-                <b-form-input type="text" size="sm" v-model.trim="data.item.name" @change="setAccountField(data.item.address, 'name', $event)" placeholder="name"></b-form-input>
-              </template>
-              <template #cell(sync)="data">
-                <b-form-checkbox size="sm" :checked="data.item.sync ? 1 : 0" value="1" @change="toggleAccountField(data.item.address, 'sync')" v-b-popover.hover="'Include in sync process?'"></b-form-checkbox>
-              </template>
-              <template #cell(include)="data">
-                <b-form-checkbox size="sm" :checked="data.item.include ? 1 : 0" value="1" @change="toggleAccountField(data.item.address, 'include')" v-b-popover.hover="'Include in NFTs view?'"></b-form-checkbox>
-              </template>
-              <template #cell(delete)="data">
-                <b-button size="sm" @click="deleteAccount(data.item.address)" variant="link" v-b-popover.hover="'Delete account'"><b-icon-trash style="color: #ff0000;" shift-v="+1" font-scale="1.0"></b-icon-trash></b-button>
-              </template>
-            </b-table>
-
-            <b-table v-if="!settings.editAccounts" small fixed striped responsive hover :fields="tokensFields" :items="pagedFilteredSortedTokens" show-empty empty-html="Click [+] above to add new collections" head-variant="light" class="mx-0 my-1">
+            <b-table small fixed striped responsive hover :fields="tokensFields" :items="pagedFilteredSortedTokens" show-empty empty-html="Click [+] above to add new collections" head-variant="light" class="mx-0 my-1">
               <template #cell(number)="data">
                 <!--
                 <b-form-checkbox size="sm" :checked="selectedCollections[data.item.contract] ? 1 : 0" value="1" @change="toggleSelectedCollections([data.item])">
                   {{ parseInt(data.index) + ((settings.collections.currentPage - 1) * settings.collections.pageSize) + 1 }}
                 </b-form-checkbox>
                 -->
-                {{ parseInt(data.index) + ((settings.tokens.currentPage - 1) * settings.tokens.pageSize) + 1 }}
+                {{ parseInt(data.index) + ((settings.tokensTable.currentPage - 1) * settings.tokensTable.pageSize) + 1 }}
               </template>
               <template #cell(token)="data">
                 <div class="d-flex flex-row">
@@ -325,6 +269,78 @@
               </template>
             </b-table>
           </b-card>
+          <b-card v-if="settings.tabIndex == 1" class="m-0 p-0 border-0" body-class="m-1 p-0" header-class="m-0 p-2">
+            <b-card-text>
+              TODO
+            </b-card-text>
+          </b-card>
+          <b-card v-if="settings.tabIndex == 2" class="m-0 p-0 border-0" body-class="m-1 p-0" header-class="m-0 p-2">
+            <div class="d-flex flex-wrap m-0 p-0">
+              <div class="mt-0 pr-1">
+                <b-form-input type="text" size="sm" v-model.trim="settings.accountsTable.filter" @change="saveSettings" debounce="600" v-b-popover.hover.top="'Account address/name filter'" placeholder="🔍 add/name regex" style="min-width: 8.0rem;"></b-form-input>
+              </div>
+              <div class="mt-0 flex-grow-1">
+              </div>
+              <!--
+              <div v-if="!sync.section" class="mt-0 pr-1">
+                <b-button size="sm" :pressed.sync="settings.editAccounts" @click="saveSettings" :variant="settings.editAccounts ? 'danger' : 'link'" v-b-popover.hover.top="settings.editAccounts ? 'End adding/editing accounts. Click Sync to apply changes' : 'Add/Edit accounts'"><b-icon-pencil shift-v="+1" font-scale="1.0"></b-icon-pencil></b-button>
+              </div>
+              <div class="mt-0 flex-grow-1">
+              </div>
+              -->
+              <div class="mt-0 pr-1">
+                <b-dropdown size="sm" variant="link" v-b-popover.hover.top="'Export/Import accounts'">
+                  <template #button-content>
+                    <b-icon-file-earmark-spreadsheet shift-v="+1" font-scale="1.2"></b-icon-file-earmark-spreadsheet>
+                  </template>
+                  <b-dropdown-item @click="exportAccounts" >Export</b-dropdown-item>
+                  <b-dropdown-item @click="showModalAccountsImport();">Import</b-dropdown-item>
+                </b-dropdown>
+              </div>
+              <div class="mt-0 flex-grow-1">
+              </div>
+              <div class="mt-0 pl-1">
+                <b-form-select size="sm" v-model="settings.accountsTable.sortOption" @change="saveSettings" :options="accountsSortOptions" v-b-popover.hover.top="'Yeah. Sort'"></b-form-select>
+              </div>
+              <div class="mt-0 pl-1">
+                <font size="-2" v-b-popover.hover.top="'# tokens'">{{ filteredSortedAccounts.length + '/' + Object.keys(settings.accounts).length }}</font>
+              </div>
+              <div class="mt-0 pl-1">
+                <b-pagination size="sm" v-model="settings.accountsTable.currentPage" @input="saveSettings" :total-rows="filteredSortedAccounts.length" :per-page="settings.accountsTable.pageSize" style="height: 0;"></b-pagination>
+              </div>
+              <div class="mt-0 pl-1">
+                <b-form-select size="sm" v-model="settings.accountsTable.pageSize" @change="saveSettings" :options="pageSizes" v-b-popover.hover.top="'Tokens page size'"></b-form-select>
+              </div>
+            </div>
+
+            <b-table small fixed striped responsive hover :fields="accountsFields" :items="pagedFilteredSortedAccounts" show-empty empty-html="Click [+] above to add new collections" head-variant="light" class="mx-0 my-1">
+              <template #head(address)="data">
+                Account <b-button v-b-modal.new-address-modal-prevent-closing variant="link" v-b-popover.hover.top="'Add new account'"><b-icon-plus-square shift-v="+1" font-scale="0.8"></b-icon-plus-square></b-button>
+                <b-modal id="new-address-modal-prevent-closing" ref="modal" title="New Address" @show="newAddressResetModal" @hidden="newAddressResetModal" @ok="newAddressHandleOk">
+                  <form ref="form" @submit.stop.prevent="newAddressHandleSubmit">
+                    <b-form-group label="Address" label-for="name-input" :state="newAddressState" invalid-feedback="Please enter a valid Ethereum address">
+                      <b-form-input id="name-input" v-model="newAddress" :state="newAddressState" required placeholder="0x1234..."></b-form-input>
+                    </b-form-group>
+                  </form>
+                </b-modal>
+              </template>
+              <template #cell(group)="data">
+                <b-form-input type="text" size="sm" v-model.trim="data.item.group" @change="setAccountField(data.item.address, 'group', $event)" placeholder="group"></b-form-input>
+              </template>
+              <template #cell(name)="data">
+                <b-form-input type="text" size="sm" v-model.trim="data.item.name" @change="setAccountField(data.item.address, 'name', $event)" placeholder="name"></b-form-input>
+              </template>
+              <template #cell(sync)="data">
+                <b-form-checkbox size="sm" :checked="data.item.sync ? 1 : 0" value="1" @change="toggleAccountField(data.item.address, 'sync')" v-b-popover.hover="'Include in sync process?'"></b-form-checkbox>
+              </template>
+              <template #cell(include)="data">
+                <b-form-checkbox size="sm" :checked="data.item.include ? 1 : 0" value="1" @change="toggleAccountField(data.item.address, 'include')" v-b-popover.hover="'Include in NFTs view?'"></b-form-checkbox>
+              </template>
+              <template #cell(delete)="data">
+                <b-button size="sm" @click="deleteAccount(data.item.address)" variant="link" v-b-popover.hover="'Delete account'"><b-icon-trash style="color: #ff0000;" shift-v="+1" font-scale="1.0"></b-icon-trash></b-button>
+              </template>
+            </b-table>
+          </b-card>
         </b-card>
         <b-card no-header body-class="m-0 p-0" class="m-0 p-0 border-0">
           <b-card-text class="text-right">
@@ -342,19 +358,24 @@
           coinbase: null,
           settings: {
             tabIndex: 0,
-            tokenFilter: null,
-            collectionFilter: null,
             showAdditionalFilters: false,
             filters: {},
             editAccounts: false,
             accounts: {},
-            tokens: {
+            accountsTable: {
               filter: null,
               currentPage: 1,
               pageSize: 10,
               sortOption: 'lastsaledsc',
             },
-            version: 8,
+            tokensTable: {
+              tokenFilter: null,
+              collectionFilter: null,
+              currentPage: 1,
+              pageSize: 10,
+              sortOption: 'lastsaledsc',
+            },
+            version: 9,
           },
           newAddress: null,
           restoreFile: null,
@@ -375,6 +396,12 @@
           ensMap: {},
           selectedCollections: {},
           selectedMainTable: {},
+          accountsSortOptions: [
+            { value: 'groupnameasc', text: '▲ Group, ▲ Name' },
+            { value: 'groupnamedsc', text: '▼ Group, ▲ Name' },
+            { value: 'nameasc', text: '▲ Name' },
+            { value: 'namedsc', text: '▼ Name' },
+          ],
           tokensSortOptions: [
             { value: 'lastsaleasc', text: '▲ Last Sale' },
             { value: 'lastsaledsc', text: '▼ Last Sale' },
@@ -538,22 +565,72 @@
           },
           filteredSortedAccounts() {
             let results = this.filteredAccounts;
-            results.sort((a, b) => {
-              if (('' + a.group).localeCompare(b.group) == 0) {
+
+            if (this.settings.accountsTable.sortOption == 'groupnameasc') {
+              results.sort((a, b) => {
+                if (('' + a.group).localeCompare(b.group) == 0) {
+                  if (('' + a.name).localeCompare(b.name) == 0) {
+                    return ('' + a.account).localeCompare(b.account);
+                  } else {
+                    return ('' + a.name).localeCompare(b.name);
+                  }
+                } else {
+                  return ('' + a.group).localeCompare(b.group);
+                }
+              });
+            } else if (this.settings.accountsTable.sortOption == 'groupnamedsc') {
+              results.sort((a, b) => {
+                if (('' + a.group).localeCompare(b.group) == 0) {
+                  if (('' + a.name).localeCompare(b.name) == 0) {
+                    return ('' + a.account).localeCompare(b.account);
+                  } else {
+                    return ('' + a.name).localeCompare(b.name);
+                  }
+                } else {
+                  return ('' + b.group).localeCompare(a.group);
+                }
+              });
+            } else if (this.settings.accountsTable.sortOption == 'nameasc') {
+              results.sort((a, b) => {
                 if (('' + a.name).localeCompare(b.name) == 0) {
                   return ('' + a.account).localeCompare(b.account);
                 } else {
                   return ('' + a.name).localeCompare(b.name);
                 }
-              } else {
-                return ('' + a.group).localeCompare(b.group);
-              }
-            });
+              });
+            } else if (this.settings.accountsTable.sortOption == 'namedsc') {
+              results.sort((a, b) => {
+                if (('' + a.name).localeCompare(b.name) == 0) {
+                  return ('' + a.account).localeCompare(b.account);
+                } else {
+                  return ('' + b.name).localeCompare(a.name);
+                }
+              });
+            } else {
+              results.sort((a, b) => {
+                if (('' + a.group).localeCompare(b.group) == 0) {
+                  if (('' + a.name).localeCompare(b.name) == 0) {
+                    return ('' + a.account).localeCompare(b.account);
+                  } else {
+                    return ('' + a.name).localeCompare(b.name);
+                  }
+                } else {
+                  return ('' + a.group).localeCompare(b.group);
+                }
+              });
+            }
+            console.log(JSON.stringify(results, null, 2));
             return results;
           },
+          pagedFilteredSortedAccounts() {
+            // return this.filteredSortedTokens.slice((this.settings.tokens.currentPage - 1) * this.settings.tokens.pageSize, this.settings.tokens.currentPage * this.settings.tokens.pageSize);
+            const result = this.filteredSortedAccounts.slice((this.settings.accountsTable.currentPage - 1) * this.settings.accountsTable.pageSize, this.settings.accountsTable.currentPage * this.settings.accountsTable.pageSize);
+            console.log(JSON.stringify(result, null, 2));
+            return result;
+          },
           filteredTokens() {
-            const tokenFilterRegex = this.settings.tokenFilter && this.settings.tokenFilter.length > 0 ? new RegExp(this.settings.tokenFilter, 'i') : null;
-            const searchCollectionLower = this.settings.collectionfilter && this.settings.collectionfilter.toLowerCase() || null;
+            const tokenFilterRegex = this.settings.tokensTable.tokenFilter && this.settings.tokensTable.tokenFilter.length > 0 ? new RegExp(this.settings.tokensTable.tokenFilter, 'i') : null;
+            const searchCollectionLower = this.settings.tokensTable.collectionfilter && this.settings.tokensTable.collectionfilter.toLowerCase() || null;
             let groupFilter = null;
             if (this.settings.filters.groups && Object.keys(this.settings.filters.groups).length > 0) {
               groupFilter = this.settings.filters.groups;
@@ -617,13 +694,13 @@
           },
           filteredSortedTokens() {
             let results = this.filteredTokens;
-            if (this.settings.tokens.sortOption == 'lastsaleasc') {
+            if (this.settings.tokensTable.sortOption == 'lastsaleasc') {
               results.sort((a, b) => {
                 const lastSaleA = a.lastSale && a.lastSale.timestamp || 0;
                 const lastSaleB = b.lastSale && b.lastSale.timestamp || 0;
                 return lastSaleA - lastSaleB;
               });
-            } else if (this.settings.tokens.sortOption == 'lastsaledsc') {
+            } else if (this.settings.tokensTable.sortOption == 'lastsaledsc') {
               results.sort((a, b) => {
                 const lastSaleA = a.lastSale && a.lastSale.timestamp || 0;
                 const lastSaleB = b.lastSale && b.lastSale.timestamp || 0;
@@ -634,7 +711,7 @@
           },
           pagedFilteredSortedTokens() {
             // return this.filteredSortedTokens.slice((this.settings.tokens.currentPage - 1) * this.settings.tokens.pageSize, this.settings.tokens.currentPage * this.settings.tokens.pageSize);
-            const result = this.filteredSortedTokens.slice((this.settings.tokens.currentPage - 1) * this.settings.tokens.pageSize, this.settings.tokens.currentPage * this.settings.tokens.pageSize);
+            const result = this.filteredSortedTokens.slice((this.settings.tokensTable.currentPage - 1) * this.settings.tokensTable.pageSize, this.settings.tokensTable.currentPage * this.settings.tokensTable.pageSize);
             // console.log(JSON.stringify(result, null, 2));
             return result;
           },
@@ -1267,8 +1344,8 @@
             const tempSettings = JSON.parse(localStorage.myNFTsSettings);
             if ('version' in tempSettings && tempSettings.version == this.settings.version) {
               this.settings = tempSettings;
-              if (this.settings.tokens.currentPage > 1) {
-                this.settings.tokens.currentPage = 1;
+              if (this.settings.tokensTable.currentPage > 1) {
+                this.settings.tokensTable.currentPage = 1;
               }
             }
           }
