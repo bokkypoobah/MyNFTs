@@ -324,6 +324,26 @@
                   </form>
                 </b-modal>
               </template>
+              <template #head(sync)="data">
+                Sync
+                <b-dropdown size="sm" variant="link" v-b-popover.hover="'Toggle selection'">
+                  <template #button-content>
+                    <b-icon-check-square shift-v="+1" font-scale="0.9"></b-icon-check-square>
+                  </template>
+                  <b-dropdown-item href="#" @click="toggleSyncAccounts(pagedFilteredSortedAccounts)">Toggle sync for all accounts on this page</b-dropdown-item>
+                  <b-dropdown-item href="#" @click="toggleSyncAccounts(filteredSortedAccounts)">Toggle sync for all accounts on all pages</b-dropdown-item>
+                </b-dropdown>
+              </template>
+              <template #head(include)="data">
+                Include
+                <b-dropdown size="sm" variant="link" v-b-popover.hover="'Toggle selection'">
+                  <template #button-content>
+                    <b-icon-check-square shift-v="+1" font-scale="0.9"></b-icon-check-square>
+                  </template>
+                  <b-dropdown-item href="#" @click="toggleIncludeAccounts(pagedFilteredSortedAccounts)">Toggle include for all accounts on this page</b-dropdown-item>
+                  <b-dropdown-item href="#" @click="toggleIncludeAccounts(filteredSortedAccounts)">Toggle include for all accounts on all pages</b-dropdown-item>
+                </b-dropdown>
+              </template>
               <template #cell(group)="data">
                 <b-form-input type="text" size="sm" v-model.trim="data.item.group" @change="setAccountField(data.item.address, 'group', $event)" placeholder="group"></b-form-input>
               </template>
@@ -826,6 +846,36 @@
             };
             console.log(JSON.stringify(this.modalToken, null, 2));
             this.$bvModal.show('modal-token');
+          },
+          toggleSyncAccounts(items) {
+            let someFalse = false;
+            let someTrue = false;
+            for (const item of items) {
+              if (item.sync) {
+                someTrue = true;
+              } else {
+                someFalse = true;
+              }
+            }
+            for (const item of items) {
+              Vue.set(this.settings.accounts[item.address], 'sync', !(someTrue && !someFalse));
+            }
+            this.saveSettings();
+          },
+          toggleIncludeAccounts(items) {
+            let someFalse = false;
+            let someTrue = false;
+            for (const item of items) {
+              if (item.include) {
+                someTrue = true;
+              } else {
+                someFalse = true;
+              }
+            }
+            for (const item of items) {
+              Vue.set(this.settings.accounts[item.address], 'include', !(someTrue && !someFalse));
+            }
+            this.saveSettings();
           },
           async syncAccounts() {
             console.log("syncAccounts");
