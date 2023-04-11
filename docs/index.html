@@ -225,28 +225,10 @@
             <b-table v-if="settings.editAccounts" small fixed striped responsive hover :fields="accountsFields" :items="filteredSortedAccounts" show-empty empty-html="Click [+] above to add new collections" head-variant="light" class="mx-0 my-1">
               <template #head(address)="data">
                 Account <b-button v-b-modal.new-address-modal-prevent-closing variant="link" v-b-popover.hover.top="'Add new account'"><b-icon-plus-square shift-v="+1" font-scale="0.8"></b-icon-plus-square></b-button>
-                <b-modal
-                  id="new-address-modal-prevent-closing"
-                  ref="modal"
-                  title="New Address"
-                  @show="newAddressResetModal"
-                  @hidden="newAddressResetModal"
-                  @ok="newAddressHandleOk"
-                >
+                <b-modal id="new-address-modal-prevent-closing" ref="modal" title="New Address" @show="newAddressResetModal" @hidden="newAddressResetModal" @ok="newAddressHandleOk">
                   <form ref="form" @submit.stop.prevent="newAddressHandleSubmit">
-                    <b-form-group
-                      label="Address"
-                      label-for="name-input"
-                      invalid-feedback="Please enter a valid Ethereum address"
-                      :state="newAddressState"
-                    >
-                      <b-form-input
-                        id="name-input"
-                        v-model="newAddress"
-                        :state="newAddressState"
-                        required
-                        placeholder="0x1234..."
-                      ></b-form-input>
+                    <b-form-group label="Address" label-for="name-input" :state="newAddressState" invalid-feedback="Please enter a valid Ethereum address">
+                      <b-form-input id="name-input" v-model="newAddress" :state="newAddressState" required placeholder="0x1234..."></b-form-input>
                     </b-form-group>
                   </form>
                 </b-modal>
