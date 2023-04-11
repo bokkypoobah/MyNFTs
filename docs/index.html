@@ -120,18 +120,20 @@
             <b-form-group label="Restore:" label-for="restore-from-backup-browse" label-size="sm" label-cols-sm="2" label-align-sm="right" :description="'Select backup .tsv file from your local computer to restore'" class="mx-0 my-1 p-0">
               <b-form-file size="sm" id="restore-from-backup-browse" v-model="restoreFile" @change="backupFilesChange($event.target.name, $event.target.files)" accept=".tsv" class="w-75"></b-form-file>
             </b-form-group>
-            <font v-if="restoreAddresses" size="-2">
-              <b-table small fixed striped sticky-header="200px" :fields="accountsImportAddressesFields" :items="restoreAddresses" head-variant="light">
-                <!--
-                <template #cell(select)="data">
-                  <b-form-checkbox size="sm" :checked="(settings.filters['groups'] && settings.filters['groups'][data.item.group]) ? 1 : 0" value="1" @change="filterChanged('groups', data.item.group)"></b-form-checkbox>
-                </template>
-                <template #cell(group)="data">
-                  {{ data.item.group }}
-                </template>
-              -->
-              </b-table>
-            </font>
+            <b-form-group v-if="restoreAddresses" label="Loaded data:" label-for="restore-from-backup-data" label-size="sm" label-cols-sm="2" label-align-sm="right" :description="'Only valid unique addresses will be imported'" class="mx-0 my-1 p-0">
+              <font v-if="restoreAddresses" size="-2">
+                <b-table small id="restore-from-backup-data" fixed striped sticky-header="200px" :fields="accountsImportAddressesFields" :items="restoreAddresses" head-variant="light">
+                  <!--
+                  <template #cell(select)="data">
+                    <b-form-checkbox size="sm" :checked="(settings.filters['groups'] && settings.filters['groups'][data.item.group]) ? 1 : 0" value="1" @change="filterChanged('groups', data.item.group)"></b-form-checkbox>
+                  </template>
+                  <template #cell(group)="data">
+                    {{ data.item.group }}
+                  </template>
+                -->
+                </b-table>
+              </font>
+            </b-form-group>
           </b-modal>
 
           <b-card class="m-0 p-0 border-0" body-class="m-1 p-0" header-class="m-0 p-2">
@@ -429,11 +431,11 @@
             { key: 'count', label: '#', sortable: true, thStyle: 'width: 20%;', thClass: 'text-right', tdClass: 'text-right' },
           ],
           accountsImportAddressesFields: [
-            { key: 'address', label: 'Address', sortable: true, thStyle: 'width: 40%;', tdClass: 'text-truncate' },
+            { key: 'address', label: 'Address', sortable: true, thStyle: 'width: 60%;', tdClass: 'text-truncate' },
             { key: 'name', label: 'Name', sortable: true, thStyle: 'width: 20%;', tdClass: 'text-truncate' },
             { key: 'group', label: 'Group', sortable: true, thStyle: 'width: 20%;', tdClass: 'text-truncate' },
-            { key: 'sync', label: 'Sync', sortable: true, thStyle: 'width: 10%;', tdClass: 'text-truncate' },
-            { key: 'include', label: 'Include', sortable: true, thStyle: 'width: 10%;', tdClass: 'text-truncate' },
+            // { key: 'sync', label: 'Sync', sortable: true, thStyle: 'width: 10%;', tdClass: 'text-truncate' },
+            // { key: 'include', label: 'Include', sortable: true, thStyle: 'width: 10%;', tdClass: 'text-truncate' },
           ],
           db: {
             name: "mynfts089",
