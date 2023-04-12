@@ -264,8 +264,15 @@
                   </div>
                 </div>
               </template>
-              <template #cell(info)="data">
-                {{ data.item.lastSale }}
+              <template #cell(lastSaleAmount)="data">
+                <div v-if="data.item.lastSale">
+                  {{ data.item.lastSale.amount }} {{ data.item.lastSale.currency }} <font size="-2">{{ data.item.lastSale.amountInUSD }} USD</font>
+                </div>
+              </template>
+              <template #cell(lastSaleTime)="data">
+                <div v-if="data.item.lastSale">
+                  {{ formatTimestamp(data.item.lastSale.timestamp) }}
+              </div>
               </template>
             </b-table>
           </b-card>
@@ -448,8 +455,9 @@
           ],
           tokensFields: [
             { key: 'number', label: '#', sortable: false, thStyle: 'width: 5%;', tdClass: 'text-truncate' },
-            { key: 'token', label: 'Token', sortable: false, thStyle: 'width: 45%;', tdClass: 'text-truncate' },
-            { key: 'info', label: 'Info', sortable: false, thStyle: 'width: 50%;', tdClass: 'text-truncate' },
+            { key: 'token', label: 'Token', sortable: false, thStyle: 'width: 55%;', tdClass: 'text-truncate' },
+            { key: 'lastSaleAmount', label: 'Last Sale Amount', sortable: false, thStyle: 'width: 20%;', tdClass: 'text-truncate' },
+            { key: 'lastSaleTime', label: 'Last Sale', sortable: false, thStyle: 'width: 20%;', tdClass: 'text-truncate' },
           ],
           groupsFilterFields: [
             { key: 'select', label: '', thStyle: 'width: 15%;' },
