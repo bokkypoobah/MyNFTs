@@ -52,7 +52,7 @@
           </b-navbar-brand>
           <b-navbar-nav class="ml-auto">
             <b-nav-item size="sm" @click="settings.tabIndex = 0; saveSettings()" :active="settings.tabIndex == 0" active-class="active" v-b-popover.hover="'View NFTs'">NFTs</b-nav-item>
-            <b-nav-item size="sm" @click="settings.tabIndex = 1; saveSettings()" :active="settings.tabIndex == 1" active-class="active" v-b-popover.hover="'View collections'">Collections</b-nav-item>
+            <!-- <b-nav-item size="sm" @click="settings.tabIndex = 1; saveSettings()" :active="settings.tabIndex == 1" active-class="active" v-b-popover.hover="'View collections'">Collections</b-nav-item> -->
             <b-nav-item size="sm" @click="settings.tabIndex = 2; saveSettings()" :active="settings.tabIndex == 2" active-class="active" v-b-popover.hover="'View/edit accounts'">Accounts</b-nav-item>
             <!-- <b-avatar v-if="coinbase && coinbase != ensOrAddress(coinbase)" rounded variant="light" size="2.0rem" :src="'https://metadata.ens.domains/mainnet/avatar/' + ensOrAddress(coinbase)" v-b-popover.hover="'Your ENS avatar if set'"></b-avatar>
             <b-button size="sm" variant="primary" class="ml-1" @click="processIt('connect')" v-b-popover.hover.bottom="'Click to update wallet'">{{ coinbase ? ensOrAddress(coinbase, 32) : 'Connect' }}</b-button> -->
